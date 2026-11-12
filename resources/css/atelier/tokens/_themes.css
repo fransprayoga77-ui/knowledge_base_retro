@@ -1,0 +1,1139 @@
+/* ════════════════════════════════════════════════════════════════════════
+   _themes.css — Layer 3: the 11 cohesive colour schemes
+   ────────────────────────────────────────────────────────────────────────
+   Each scheme swaps its full set of colour roles together (spec 01 §3.1).
+   The default Atelier preset (c2) is inline on :root in _roles.css and needs
+   NO attribute on <html>, which makes twelve palettes in all: 12 presets x
+   light/dark.
+
+   COLOUR ONLY. These blocks used to carry --at-font-display and
+   --at-font-sans too, which is what welded the two choices together. Type is
+   now its own axis in _typography.css, keyed on data-at-type-preset. Adding
+   a --at-font-* back into a block here would silently re-couple them for
+   that one preset — put it in _typography.css instead.
+
+   Selecting a preset sets data-at-theme-preset="<name>", which matches the
+   light block here. Dark composes via
+   [data-at-theme="dark"][data-at-theme-preset="<name>"] (2 attributes > 1 by
+   specificity; no !important anywhere).
+
+   ── WHY EVERY BLOCK RESTATES ITS on-* FAMILY, focus-ring AND link ───────
+   A light preset block is (0,1,0) — the same specificity as the shared
+   [data-at-theme='dark'] block in _roles.css — and this file loads AFTER
+   _roles.css. So any token a light block declares and its dark block does not
+   would win in dark mode on source order. Every dark block therefore restates
+   the full on-* family, --at-accent-text, --at-focus-ring, --at-link and
+   --at-link-hover even where the value is the shared dark answer. See the two
+   contracts documented at the top of _roles.css.
+
+   ── HUE PLACEMENT ───────────────────────────────────────────────────────
+   The twelve accents by Lab hue angle, ascending. Regenerate with
+   `node temp/tools/color.mjs accents light|dark`; do not hand-edit.
+
+     27.7  Sage      #f79690      115.4  Stencil   #475c00   [dark chip]
+     45.1  Atelier   #ff946f      165.6  Lacquer   #006c4f   [dark chip]
+     61.9  Foundry   #ff963c      197.2  Lagoon    #00c4c5
+    242.9  Nocturne  #50cbff      277.9  Primer    #235897   [dark chip]
+    289.8  Gantry    #0268ea      316.5  Violet    #944abc   [dark chip]
+    330.1  Sorbet    #fc85f0      356.0  Electric  #ff8cb8
+
+   Seven of the twelve accents are light L*72–77 fills carrying ink; five are
+   dark chips carrying white or the preset's own canvas — Violet, Lacquer,
+   Primer, Stencil (knockout: board through the cut) and Gantry.
+
+   In LIGHT the cross-preset separation rule holds: of the 66 accent pairs,
+   three sit under 30 dE — sage~atelier 18.1, atelier~foundry 25.0,
+   sage~electric 25.5 — all pre-existing pairs. The closest pair involving a
+   new preset is stencil~lacquer at 37.0.
+
+   In DARK it does not, and that is a known accepted state. Six pairs sit under
+   30: sage~atelier 16.5, atelier~foundry 16.7, nocturne~primer 25.4,
+   primer~gantry 25.1, sorbet~electric 23.5, lacquer~lagoon 27.7. Dark accents
+   are compressed by construction — each has to clear 4.5:1 against a near-black
+   canvas, which pins them into a narrow high-lightness band with less room than
+   the light ramp has. 25 is the achievable floor there, not 30.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ════════════════════════════════════════════════════════════════════════
+   1. ELECTRIC — concept c1
+   The benchmark: hue spacing was already right. The pink lifts so black on it
+   goes from 6.4:1 to 9.1:1, the look it was after.
+   ════════════════════════════════════════════════════════════════════════ */
+[data-at-theme-preset='electric'] {
+  --at-ink: #0a0a0a;
+  --at-canvas: #efede3;
+  --at-surface: #ffffff;
+  --at-surface-subtle: #e6e3d6;
+  --at-surface-raised: #ffffff;
+  --at-surface-overlay: #ffffff;
+  --at-fill-hover: #efede3;
+  --at-fill-active: #e0ddcc;
+  --at-border: var(--at-ink);
+  --at-border-strong: var(--at-ink);
+  --at-text-strong: var(--at-ink);
+  --at-text: #1a1a1a;
+  --at-text-muted: #636363;
+  --at-text-subtle: #8c8c8c;
+  --at-text-disabled: #b8b8b8;
+  --at-accent: #ff8cb8; /* was #ff4d9d — L*72, ink at 9.14:1 */
+  --at-accent-hover: #ff62a6;
+  --at-accent-wash: #fde0ec;
+  --at-accent-rgb: 255, 140, 184;
+  --at-accent-text: #bf2971;
+  --at-secondary: #ffd60a;
+  --at-secondary-wash: #fff6cc;
+  --at-tertiary: #3551f0;
+  --at-tertiary-wash: #dde3fb;
+  --at-lime: #c9f23b;
+  --at-lime-wash: #ecfac4;
+  --at-success: #6fbf1a;
+  --at-warning: var(--at-secondary);
+  --at-danger: #ff5436;
+  --at-info: var(--at-tertiary);
+  --at-on-accent: var(--at-ink);
+  --at-on-secondary: var(--at-ink);
+  --at-on-tertiary: #ffffff;
+  --at-on-lime: var(--at-ink);
+  --at-on-success: var(--at-ink);
+  --at-on-warning: var(--at-ink);
+  --at-on-danger: var(--at-ink); /* #ff5436 is bright — ink beats white 6.2:1 */
+  --at-on-info: #ffffff;
+  --at-muted: #636363;
+  --at-focus-ring: var(--at-accent-text);
+  --at-link: var(--at-accent-text);
+  --at-link-hover: #a7005e;
+}
+[data-at-theme='dark'][data-at-theme-preset='electric'] {
+  --at-ink-strong: #e8e8e8;
+  /* Electric is the one preset whose impression is NOT its old ink mixed into
+     the surface. #e8e8e8 is a pure neutral, so mixing it into a near-neutral
+     surface gave #5b5c5d at chroma 0.002 — dead grey, the only preset with no
+     hue of its own. Cut from --at-accent instead, at oklch chroma 0.063: a
+     shade above Violet's 0.053 because a 1.5px line needs more chroma than a
+     fill to read as coloured at all. Same 2.7 target, so it dims identically. */
+  --at-ink: #7b5062; /* 14.75 -> 2.72:1 on surface */
+  --at-canvas: #0e0e10;
+  --at-surface: #161618;
+  --at-surface-subtle: #1d1d20;
+  --at-surface-raised: #212124;
+  --at-surface-overlay: #27272a;
+  --at-fill-hover: #1d1d20;
+  --at-fill-active: #2a2a2e;
+  --at-text-strong: var(--at-ink-strong);
+  --at-text: #d4d4d4;
+  --at-text-muted: #a0a0a0;
+  --at-text-subtle: #787878;
+  --at-text-disabled: #4a4a4a;
+  --at-accent: #ff83b9; /* was #ff6fb0 — oklch L .734->.764, C .187->.161, hue held. canvas 7.49->8.45 */
+  --at-accent-hover: #ffa0c6; /* oklch L .812 = accent +0.048, the step this pair already had */
+  --at-accent-wash: #2e1020;
+  --at-accent-rgb: 255, 131, 185;
+  --at-accent-text: var(--at-accent);
+  --at-secondary: #ffe04d;
+  --at-secondary-wash: #2a2410;
+  --at-tertiary: #7088f5;
+  --at-tertiary-wash: #161a2e;
+  --at-lime: #d6f562;
+  --at-lime-wash: #1e2611;
+  --at-success: #6fc22a; /* was #8fd44d — 20.5 dE from lime */
+  --at-danger: #ff7a64;
+  --at-on-accent: var(--at-canvas);
+  --at-on-secondary: var(--at-canvas);
+  --at-on-tertiary: var(--at-canvas);
+  --at-on-lime: var(--at-canvas);
+  --at-on-success: var(--at-canvas);
+  --at-on-warning: var(--at-canvas);
+  --at-on-danger: var(--at-canvas);
+  --at-on-info: var(--at-canvas);
+  --at-muted: #a0a0a0;
+  --at-focus-ring: var(--at-accent);
+  --at-link: var(--at-accent);
+  --at-link-hover: var(--at-accent-hover);
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   2. SAGE — concept c5
+   Botanical. Keeps the green dominance but stops tertiary, success and lime
+   being one colour. The accent turns from a second terracotta into a dusty
+   rose clay: low chroma, complementary to the greens, and it no longer
+   shadows Atelier.
+   ════════════════════════════════════════════════════════════════════════ */
+[data-at-theme-preset='sage'] {
+  --at-ink: #1f2a1f;
+  --at-canvas: #eef1ea;
+  --at-surface: #ffffff;
+  --at-surface-subtle: #e3e8dc;
+  --at-surface-raised: #ffffff;
+  --at-surface-overlay: #ffffff;
+  --at-fill-hover: #eef1ea;
+  --at-fill-active: #dde3d0;
+  --at-border: var(--at-ink);
+  --at-border-strong: var(--at-ink);
+  --at-text-strong: var(--at-ink);
+  --at-text: #2c3a2c;
+  --at-text-muted: #5d6b57; /* was #6b7a65 — 4.00:1 on canvas, under the floor */
+  --at-text-subtle: #8a9785;
+  --at-text-disabled: #adb8a8;
+  --at-accent: #f79690; /* was #c97b5c — L*72 rose clay, ink at 6.90:1 */
+  --at-accent-hover: #df817b;
+  --at-accent-wash: #f7dedb; /* re-cut to the new hue */
+  --at-accent-rgb: 247, 150, 144;
+  --at-accent-text: #925551;
+  --at-secondary: #d4a943;
+  --at-secondary-wash: #f3e9cf;
+  --at-tertiary: #3d5a37; /* deeper forest — structural, not a mid green */
+  --at-tertiary-wash: #d9e2d4;
+  --at-lime: #b9cf63; /* yellower, so it stops reading as a pale success */
+  --at-lime-wash: #eaf0d2;
+  --at-success: #5f9e3f; /* brighter — 22 L* clear of tertiary */
+  --at-warning: var(--at-secondary);
+  --at-danger: #9c3324;
+  --at-info: var(--at-tertiary);
+  --at-on-accent: var(--at-ink);
+  --at-on-secondary: var(--at-ink);
+  --at-on-tertiary: #ffffff;
+  --at-on-lime: var(--at-ink);
+  --at-on-success: var(--at-ink);
+  --at-on-warning: var(--at-ink);
+  --at-on-danger: #ffffff;
+  --at-on-info: #ffffff;
+  --at-muted: #5d6b57;
+  --at-focus-ring: var(--at-accent-text);
+  --at-link: var(--at-accent-text);
+  --at-link-hover: #7c423f;
+}
+[data-at-theme='dark'][data-at-theme-preset='sage'] {
+  --at-ink-strong: #d8e0d2;
+  --at-ink: #5c665a; /* 11.94 -> 2.70:1 on surface */
+  --at-canvas: #121a12;
+  --at-surface: #1a231a;
+  --at-surface-subtle: #212c21;
+  --at-surface-raised: #253125;
+  --at-surface-overlay: #2b382b;
+  --at-fill-hover: #212c21;
+  --at-fill-active: #2c3a2c;
+  --at-text-strong: var(--at-ink-strong);
+  --at-text: #c0ccc0;
+  --at-text-muted: #94a094;
+  --at-text-subtle: #748074;
+  --at-text-disabled: #4a564a;
+  --at-accent: #f9aea8; /* was #d99a80 (h48.5, orphaned from the light mode) — L*78 C30 h28, the dark sibling of the light #f79690 (h27.7) */
+  --at-accent-hover: #ffc3bd; /* L*83.9 C23.5 h29 — the standard dark-hover step */
+  --at-accent-wash: #301e1c; /* re-cut to the new hue; accent on it 8.77:1 */
+  --at-accent-rgb: 249, 174, 168;
+  --at-accent-text: var(--at-accent);
+  --at-secondary: #e0bd66;
+  --at-secondary-wash: #2a2410;
+  --at-tertiary: #86a878;
+  --at-tertiary-wash: #1a2418;
+  --at-lime: #c6e05c; /* clears success 27.0 AND the mustard secondary 32.2 */
+  --at-lime-wash: #1e2812;
+  --at-success: #6fb84f;
+  --at-danger: #e2685a;
+  --at-on-accent: var(--at-canvas);
+  --at-on-secondary: var(--at-canvas);
+  --at-on-tertiary: var(--at-canvas);
+  --at-on-lime: var(--at-canvas);
+  --at-on-success: var(--at-canvas);
+  --at-on-warning: var(--at-canvas);
+  --at-on-danger: var(--at-canvas);
+  --at-on-info: var(--at-canvas);
+  --at-muted: #94a094;
+  --at-focus-ring: var(--at-accent);
+  --at-link: var(--at-accent);
+  --at-link-hover: var(--at-accent-hover);
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   3. VIOLET — concept c6
+   The best-separated palette already, and one of the presets whose accent is
+   a DARK chip carrying white rather than an L*72 fill carrying ink. Softened
+   on request: chroma -32% off the old #7b3ff2. Tertiary was a second purple.
+   ════════════════════════════════════════════════════════════════════════ */
+[data-at-theme-preset='violet'] {
+  --at-ink: #2a1f3d;
+  --at-canvas: #efeaf5;
+  --at-surface: #ffffff;
+  --at-surface-subtle: #e4dcef;
+  --at-surface-raised: #ffffff;
+  --at-surface-overlay: #ffffff;
+  --at-fill-hover: #efeaf5;
+  --at-fill-active: #ddd3e8;
+  --at-border: var(--at-ink);
+  --at-border-strong: var(--at-ink);
+  --at-text-strong: var(--at-ink);
+  --at-text: #3a2c52;
+  --at-text-muted: #6b5f7a;
+  --at-text-subtle: #8a7e9a;
+  --at-text-disabled: #b0a4c0;
+  --at-accent: #944abc; /* was #7b3ff2. oklch(0.551 0.180 311.9), chroma -32%, dE 35.2. White on it 5.30 */
+  --at-accent-hover: #8035a7; /* was #6929e0. oklch(0.485 0.180 311.7), one step down. White 7.03 */
+  --at-accent-wash: #e6d7f0; /* re-cut to the new hue, chroma 0.052 -> 0.037 in step with the fill */
+  --at-accent-rgb: 148, 74, 188;
+  --at-accent-text: #863bad; /* was #7036e8. canvas 5.48 / surface 6.48 / own wash 4.73 — all three improve on the old 5.25/6.21/4.52 */
+  --at-secondary: #fba834;
+  --at-secondary-wash: #fee6c4;
+  --at-tertiary: #2a4bbf; /* was #5b2a86 — indigo, not another violet */
+  --at-tertiary-wash: #d7dff7;
+  --at-lime: #c2e84f;
+  --at-lime-wash: #ecf7c8;
+  --at-success: #3fa874;
+  --at-warning: var(--at-secondary);
+  --at-danger: #c02744; /* was #e0536b — deep enough to carry white */
+  --at-info: var(--at-tertiary);
+  --at-on-accent: #ffffff; /* the accent is a dark chip — white wins here */
+  --at-on-secondary: var(--at-ink);
+  --at-on-tertiary: #ffffff;
+  --at-on-lime: var(--at-ink);
+  --at-on-success: var(--at-ink);
+  --at-on-warning: var(--at-ink);
+  --at-on-danger: #ffffff;
+  --at-on-info: #ffffff;
+  --at-muted: #6b5f7a;
+  --at-focus-ring: var(--at-accent-text);
+  --at-link: var(--at-accent-text);
+  --at-link-hover: #76299b; /* was #561fd1. canvas 6.93 / surface 8.20 */
+}
+[data-at-theme='dark'][data-at-theme-preset='violet'] {
+  --at-ink-strong: #ddd2ee;
+  --at-ink: #645c7d; /* 11.66 -> 2.70:1 on surface */
+  --at-canvas: #16112a;
+  --at-surface: #1f1838;
+  --at-surface-subtle: #271f44;
+  --at-surface-raised: #2c2450;
+  --at-surface-overlay: #332a5c;
+  --at-fill-hover: #271f44;
+  --at-fill-active: #352a5c;
+  --at-text-strong: var(--at-ink-strong);
+  --at-text: #c4b8dc;
+  --at-text-muted: #9888b8;
+  --at-text-subtle: #786a98;
+  --at-text-disabled: #4a4068;
+  --at-accent: #b575e3; /* was #9a68f8. oklch 0.639 -> 0.674 (the lightening), C 82.4 -> 64.6. canvas-on-it 4.97 -> 5.77 */
+  --at-accent-hover: #c686f6; /* was #ac82fa. oklch(0.728 0.168 309.1) */
+  --at-accent-wash: #2a1a36; /* hue-coherence recut only — passes at 5.09 with the new accent */
+  --at-accent-rgb: 181, 117, 227;
+  --at-accent-text: var(--at-accent);
+  --at-secondary: #fcbe68;
+  --at-secondary-wash: #2a2010;
+  --at-tertiary: #7f9bf0;
+  --at-tertiary-wash: #171d38;
+  --at-lime: #d4f06a;
+  --at-lime-wash: #1f2812;
+  --at-success: #5cc098;
+  --at-danger: #f0788e;
+  --at-on-accent: var(--at-canvas);
+  --at-on-secondary: var(--at-canvas);
+  --at-on-tertiary: var(--at-canvas);
+  --at-on-lime: var(--at-canvas);
+  --at-on-success: var(--at-canvas);
+  --at-on-warning: var(--at-canvas);
+  --at-on-danger: var(--at-canvas);
+  --at-on-info: var(--at-canvas);
+  --at-muted: #9888b8;
+  --at-focus-ring: var(--at-accent); /* 5.77 canvas / 5.31 surface vs a 3:1 floor */
+  --at-link: var(--at-accent);
+  --at-link-hover: var(--at-accent-hover);
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   4. LAGOON — concept c7
+   Was four teals, a yellow and an orange.
+   ════════════════════════════════════════════════════════════════════════ */
+[data-at-theme-preset='lagoon'] {
+  --at-ink: #0a2730;
+  --at-canvas: #e8f1f2;
+  --at-surface: #ffffff;
+  --at-surface-subtle: #d8e6e8;
+  --at-surface-raised: #ffffff;
+  --at-surface-overlay: #ffffff;
+  --at-fill-hover: #e8f1f2;
+  --at-fill-active: #d0dee0;
+  --at-border: var(--at-ink);
+  --at-border-strong: var(--at-ink);
+  --at-text-strong: var(--at-ink);
+  --at-text: #143540;
+  --at-text-muted: #4e6a73; /* was #5a7780 — 4.17:1 on canvas, under the floor */
+  --at-text-subtle: #7a949c;
+  --at-text-disabled: #a4b8be;
+  --at-accent: #00c4c5; /* was #00a6a6 — L*72 aqua, ink at 7.21:1 */
+  --at-accent-hover: #00adad;
+  --at-accent-wash: #cceeee;
+  --at-accent-rgb: 0, 196, 197;
+  --at-accent-text: #007475;
+  --at-secondary: #f2b705;
+  --at-secondary-wash: #fcecb4;
+  --at-tertiary: #1b4a7a; /* was #00798c — navy, off the accent teal */
+  --at-tertiary-wash: #d3e0ee;
+  --at-lime: #8fd14f;
+  --at-lime-wash: #e2efce;
+  --at-success: #43a047; /* was #2da673 — a green, not a second teal */
+  --at-warning: var(--at-secondary);
+  --at-danger: #cf4520;
+  --at-info: var(--at-tertiary);
+  --at-on-accent: var(--at-ink);
+  --at-on-secondary: var(--at-ink);
+  --at-on-tertiary: #ffffff;
+  --at-on-lime: var(--at-ink);
+  --at-on-success: var(--at-ink);
+  --at-on-warning: var(--at-ink);
+  --at-on-danger: #ffffff;
+  --at-on-info: #ffffff;
+  --at-muted: #4e6a73;
+  --at-focus-ring: var(--at-accent-text);
+  --at-link: var(--at-accent-text);
+  --at-link-hover: #005f5f;
+}
+[data-at-theme='dark'][data-at-theme-preset='lagoon'] {
+  --at-ink-strong: #cfe2e6;
+  --at-ink: #53666c; /* 12.11 -> 2.69:1 on surface */
+  --at-canvas: #08181f;
+  --at-surface: #102329;
+  --at-surface-subtle: #162c33;
+  --at-surface-raised: #1a333b;
+  --at-surface-overlay: #204048;
+  --at-fill-hover: #162c33;
+  --at-fill-active: #1d3a42;
+  --at-text-strong: var(--at-ink-strong);
+  --at-text: #b4ccd2;
+  --at-text-muted: #88a4ac;
+  --at-text-subtle: #688890;
+  --at-text-disabled: #446068;
+  --at-accent: #2cc4c4;
+  --at-accent-hover: #48d0d0;
+  --at-accent-wash: #0a2a2a;
+  --at-accent-rgb: 44, 196, 196;
+  --at-accent-text: var(--at-accent);
+  --at-secondary: #fac83a;
+  --at-secondary-wash: #2a2310;
+  --at-tertiary: #6fa8dc;
+  --at-tertiary-wash: #10202e;
+  --at-lime: #a6df6a;
+  --at-lime-wash: #16260f;
+  --at-success: #47ab4b;
+  --at-danger: #f0714f;
+  --at-on-accent: var(--at-canvas);
+  --at-on-secondary: var(--at-canvas);
+  --at-on-tertiary: var(--at-canvas);
+  --at-on-lime: var(--at-canvas);
+  --at-on-success: var(--at-canvas);
+  --at-on-warning: var(--at-canvas);
+  --at-on-danger: var(--at-canvas);
+  --at-on-info: var(--at-canvas);
+  --at-muted: #88a4ac;
+  --at-focus-ring: var(--at-accent);
+  --at-link: var(--at-accent);
+  --at-link-hover: var(--at-accent-hover);
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   5. FOUNDRY — concept c9
+   Accent, tertiary and danger were all one orange. Tertiary becomes steel,
+   which suits the forge story better than a third rust, and the accent goes
+   hotter and lighter — molten rather than rusted.
+   ════════════════════════════════════════════════════════════════════════ */
+[data-at-theme-preset='foundry'] {
+  --at-ink: #2b1f14;
+  --at-canvas: #f7efe3;
+  --at-surface: #ffffff;
+  --at-surface-subtle: #ede2cf;
+  --at-surface-raised: #ffffff;
+  --at-surface-overlay: #ffffff;
+  --at-fill-hover: #f7efe3;
+  --at-fill-active: #ecdcc0;
+  --at-border: var(--at-ink);
+  --at-border-strong: var(--at-ink);
+  --at-text-strong: var(--at-ink);
+  --at-text: #3c2c1d;
+  --at-text-muted: #7a6450;
+  --at-text-subtle: #9a846e;
+  --at-text-disabled: #c0aa94;
+  --at-accent: #ff963c; /* was #e8763a — L*72 at 62 deg, ink at 7.40:1. Hue moved off Atelier's 45 deg, which it had converged with at the new lightness */
+  --at-accent-hover: #ee7d00;
+  --at-accent-wash: #fbe0cf;
+  --at-accent-rgb: 255, 150, 60;
+  --at-accent-text: #9e5100;
+  --at-secondary: #f0b429;
+  --at-secondary-wash: #fce8b6;
+  --at-tertiary: #42606e; /* was #b85c38 — steel */
+  --at-tertiary-wash: #dce4e8;
+  --at-lime: #cbcf5a; /* yellower — was 17 dE from success, one olive */
+  --at-lime-wash: #eef0cc;
+  --at-success: #7ba32b; /* was #6b8e23 — lifted so ink reads on it */
+  --at-warning: var(--at-secondary);
+  --at-danger: #b62d24;
+  --at-info: var(--at-tertiary);
+  --at-on-accent: var(--at-ink);
+  --at-on-secondary: var(--at-ink);
+  --at-on-tertiary: #ffffff;
+  --at-on-lime: var(--at-ink);
+  --at-on-success: var(--at-ink);
+  --at-on-warning: var(--at-ink);
+  --at-on-danger: #ffffff;
+  --at-on-info: #ffffff;
+  --at-muted: #7a6450;
+  --at-focus-ring: var(--at-accent-text);
+  --at-link: var(--at-accent-text);
+  --at-link-hover: #824100;
+}
+[data-at-theme='dark'][data-at-theme-preset='foundry'] {
+  --at-ink-strong: #e6d4bc;
+  --at-ink: #6a5d4d; /* 12.04 -> 2.73:1 on surface */
+  --at-canvas: #18110a;
+  --at-surface: #22180e;
+  --at-surface-subtle: #2a1f13;
+  --at-surface-raised: #302417;
+  --at-surface-overlay: #382a1b;
+  --at-fill-hover: #2a1f13;
+  --at-fill-active: #362718;
+  --at-text-strong: var(--at-ink-strong);
+  --at-text: #ccb898;
+  --at-text-muted: #a08c6c;
+  --at-text-subtle: #806c52;
+  --at-text-disabled: #564838;
+  --at-accent: #f08e58;
+  --at-accent-hover: #f4a474;
+  --at-accent-wash: #2e1c10;
+  --at-accent-rgb: 240, 142, 88;
+  --at-accent-text: var(--at-accent);
+  --at-secondary: #fac83a;
+  --at-secondary-wash: #2a210e;
+  --at-tertiary: #86a8b8;
+  --at-tertiary-wash: #17252b;
+  --at-lime: #d2dc6e;
+  --at-lime-wash: #1f2611;
+  --at-success: #7fb03a;
+  --at-danger: #ef5350;
+  --at-on-accent: var(--at-canvas);
+  --at-on-secondary: var(--at-canvas);
+  --at-on-tertiary: var(--at-canvas);
+  --at-on-lime: var(--at-canvas);
+  --at-on-success: var(--at-canvas);
+  --at-on-warning: var(--at-canvas);
+  --at-on-danger: var(--at-canvas);
+  --at-on-info: var(--at-canvas);
+  --at-muted: #a08c6c;
+  --at-focus-ring: var(--at-accent);
+  --at-link: var(--at-accent);
+  --at-link-hover: var(--at-accent-hover);
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   6. STENCIL — kraft board and APWA utility marking
+   ────────────────────────────────────────────────────────────────────────
+   The one preset with a non-#ffffff light surface: a cut plate on a board
+   deck. Signals are lifted from the APWA underground-utility colour code —
+   ochre gas, marking blue water, survey pink temporary, oxide red power —
+   which is a real system with real separation built in, and the survey pink
+   is why the palette never reads drab.
+   ════════════════════════════════════════════════════════════════════════ */
+[data-at-theme-preset='stencil'] {
+  --at-ink: #1c1509; /* bitumen, L*7.3 C7.3 h79; 12.43 canvas / 15.65 surface */
+  --at-canvas: #e0d5bd; /* kraft board, L*85.6 C13.2 h91 */
+  --at-surface: #f4eee1; /* cut plate, L*94.2 — the only non-#ffffff light surface of the twelve */
+  --at-surface-subtle: #d5c9af; /* accent-text on it 4.57; canvas:subtle step 1.13 */
+  --at-surface-raised: #faf6ec; /* L*96.3 — a fresh plate on top; modals/dropdowns lift off the card */
+  --at-surface-overlay: #faf6ec;
+  --at-fill-hover: #e0d5bd; /* = canvas, the house pattern */
+  --at-fill-active: #cabd9f; /* L*77.0 */
+  --at-border: var(--at-ink);
+  --at-border-strong: var(--at-ink);
+  --at-text-strong: var(--at-ink);
+  --at-text: #2e2719; /* L*16.0; 10.15 canvas / 12.79 surface */
+  --at-text-muted: #5c5340; /* L*35.7 — darker than a neutral grey because the ground is board */
+  --at-text-subtle: #7b7159; /* 3.32 on canvas */
+  --at-text-disabled: #a49a80;
+  --at-accent: #475c00; /* olive drab. L*36 C47 h115 — a dark chip, not an L*72 fill */
+  --at-accent-hover: #394a00; /* L*29; canvas on it 6.70 */
+  --at-accent-wash: #dee4b8; /* L*89.1; accent-text on it 5.68 */
+  --at-accent-rgb: 71, 92, 0;
+  --at-accent-text: #475c00; /* = the fill, the dark-chip pattern; 5.15 canvas / 6.49 surface / 5.68 wash */
+  --at-secondary: #e0a02a; /* hazard ochre (APWA gas), L*70 C67 h78; ink 7.95 */
+  --at-secondary-wash: #f6e2b6;
+  --at-tertiary: #1a5479; /* marking blue (APWA water), L*34 — the cool anchor */
+  --at-tertiary-wash: #d3dfe9;
+  --at-lime: #ef8ab8; /* survey pink (APWA temporary marking), L*70; ink 7.75 */
+  --at-lime-wash: #f9dbe7;
+  --at-success: #2b9b50; /* h148 rather than h133 — lifts accent~success to 36.60 */
+  --at-warning: var(--at-secondary);
+  --at-danger: #9e2c18; /* oxide red (APWA power), L*36 C60 h40; 66.4 dE off the accent */
+  --at-info: var(--at-tertiary);
+  --at-on-accent: var(--at-canvas); /* THE KNOCKOUT: board through the cut, 5.15:1 */
+  --at-on-secondary: var(--at-ink);
+  --at-on-tertiary: var(--at-canvas); /* board reads 5.57 and keeps white out of the palette */
+  --at-on-lime: var(--at-ink);
+  --at-on-success: var(--at-ink); /* 5.09:1 */
+  --at-on-warning: var(--at-ink);
+  --at-on-danger: var(--at-canvas); /* 5.10:1 */
+  --at-on-info: var(--at-canvas); /* 5.57:1 */
+  --at-muted: #5c5340;
+  --at-focus-ring: var(--at-accent-text);
+  --at-link: var(--at-accent-text);
+  --at-link-hover: #303f00;
+}
+[data-at-theme='dark'][data-at-theme-preset='stencil'] {
+  --at-ink-strong: #efe6d2; /* bone board — type + solid fills; 14.10:1 on surface */
+  --at-ink: #625e54; /* the impression: 14.10 -> 2.71:1, warm cast held (C6.3 h93) rather than collapsed to grey */
+  --at-canvas: #13100a; /* bitumen ground, not neutral black */
+  --at-surface: #1d1912; /* L*9.0 */
+  --at-surface-subtle: #241f16; /* accent on it 7.20 */
+  --at-surface-raised: #29241a;
+  --at-surface-overlay: #2f291e;
+  --at-fill-hover: #241f16;
+  --at-fill-active: #322c20;
+  --at-text-strong: var(--at-ink-strong);
+  --at-text: #e2d8c2; /* 13.41 canvas / 12.36 surface */
+  --at-text-muted: #97907e; /* 5.97 canvas / 5.51 surface */
+  --at-text-subtle: #78725f; /* 3.95 on canvas */
+  --at-text-disabled: #4f4a3d;
+  --at-accent: #a3b45c; /* field khaki, L*70 C47 h114 — the drab lightened, no acid left */
+  --at-accent-hover: #b6c771; /* L*77; canvas on it 10.30 */
+  --at-accent-wash: #1f2409; /* accent-text on it 7.03 */
+  --at-accent-rgb: 163, 180, 92;
+  --at-accent-text: var(--at-accent);
+  --at-secondary: #e8b247; /* hazard ochre lightened; 33.86 dE off the accent — the worst pair, structural */
+  --at-secondary-wash: #33260a;
+  --at-tertiary: #56a3d6; /* marking blue lightened */
+  --at-tertiary-wash: #0d2534;
+  --at-lime: #f59fc6; /* survey pink lightened */
+  --at-lime-wash: #331825;
+  --at-success: #46bf5e; /* h144 rather than h133 — lifts accent~success to 34.86 */
+  --at-danger: #ef6a4e; /* oxide red lightened; canvas on it 6.18 */
+  --at-on-accent: var(--at-canvas);
+  --at-on-secondary: var(--at-canvas);
+  --at-on-tertiary: var(--at-canvas);
+  --at-on-lime: var(--at-canvas);
+  --at-on-success: var(--at-canvas);
+  --at-on-warning: var(--at-canvas);
+  --at-on-danger: var(--at-canvas);
+  --at-on-info: var(--at-canvas);
+  --at-muted: #97907e;
+  --at-focus-ring: var(--at-accent);
+  --at-link: var(--at-accent);
+  --at-link-hover: var(--at-accent-hover);
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   7. GANTRY — galvanized deck, painted steel, hi-vis
+   ────────────────────────────────────────────────────────────────────────
+   The only light preset whose canvas is a cool mid-grey deck rather than a
+   warm stock, which is what buys the ink its 3.68:1 sidebar stamp. Accent is
+   a dark chip carrying white — stencil marking on painted steel.
+   ════════════════════════════════════════════════════════════════════════ */
+[data-at-theme-preset='gantry'] {
+  --at-ink: #0e1418; /* L*6.0 C3.7 h250 cold blue-black; 12.23 canvas / 18.55 surface. Deliberately the darkest ink of the set */
+  --at-canvas: #c9d3dd; /* L*84.1 C6.3 h257 galvanized-zinc deck — 6.0 L* below the next-darkest of the twelve */
+  --at-surface: #ffffff; /* steel plate on the deck, max separation (1.52:1, dE 17.1) */
+  --at-surface-subtle: #c1c9d3; /* deck -3.5 L*; text-subtle still clears 3.06:1 on it */
+  --at-surface-raised: #ffffff;
+  --at-surface-overlay: #ffffff;
+  --at-fill-hover: #c9d3dd; /* = canvas */
+  --at-fill-active: #b7bec9; /* L*76.7, same deck hue */
+  --at-border: var(--at-ink);
+  --at-border-strong: var(--at-ink);
+  --at-text-strong: var(--at-ink);
+  --at-text: #19222a; /* 10.62 canvas / 16.11 surface */
+  --at-text-muted: #42505a; /* L*33.2 — the deck forces it down; 5.48 canvas / 4.97 on surface-subtle */
+  --at-text-subtle: #61707a; /* 3.37 on canvas — the thinnest margin in the block */
+  --at-text-disabled: #8b979f;
+  --at-accent: #0268ea; /* cobalt, oklch(0.550 0.213 259.1). White 5.03:1 and stamp-on-ink 3.68:1 */
+  --at-accent-hover: #0053c4; /* one step deeper; white 6.92:1 */
+  --at-accent-wash: #d9e5fb; /* lifted to buy deck separation (dE 9.0); accent-text 6.55 on it */
+  --at-accent-rgb: 2, 104, 234;
+  --at-accent-text: #0b47ae; /* L*33.2 C64.3, same hue; 5.48 canvas / 8.31 surface / 6.55 wash */
+  --at-secondary: #ffa41b; /* hazard amber, L*74.8 h72 — opens secondary~danger to 56.0 and steps off Foundry's h62 */
+  --at-secondary-wash: #ffe0b0;
+  --at-tertiary: #0d6d7c; /* patina teal — info stops being a second blue now the accent is blue; white 6.01:1 */
+  --at-tertiary-wash: #cee5e9;
+  --at-lime: #d3e82e; /* EN ISO 20471 hi-vis fluorescent, L*87.9 — the one shock of brightness; ink 13.56:1 */
+  --at-lime-wash: #ecf3c6;
+  --at-success: #2f7d38; /* white 5.11:1 */
+  --at-warning: var(--at-secondary);
+  --at-danger: #c22118; /* signal red; white 5.96:1, dE 56.0 off the amber */
+  --at-info: var(--at-tertiary);
+  --at-on-accent: #ffffff; /* white stencil marking on painted steel, 5.03:1 */
+  --at-on-secondary: var(--at-ink); /* 9.35:1 */
+  --at-on-tertiary: #ffffff;
+  --at-on-lime: var(--at-ink);
+  --at-on-success: #ffffff;
+  --at-on-warning: var(--at-ink); /* 9.35:1 */
+  --at-on-danger: #ffffff;
+  --at-on-info: #ffffff;
+  --at-muted: #42505a;
+  --at-focus-ring: var(--at-accent-text); /* 5.48 canvas / 8.31 surface */
+  --at-link: var(--at-accent-text);
+  --at-link-hover: #073476;
+}
+[data-at-theme='dark'][data-at-theme-preset='gantry'] {
+  --at-ink-strong: #d3e0e9; /* cool steel white for type and solid fills; 13.06:1 on surface */
+  /* The impression, re-cut from --at-accent. A pure hue+chroma move off the
+     retuned #575f64: contrast between the two is 1.00:1, so the printed weight
+     is provably unchanged and only its colour shifted. oklch(0.482 0.070
+     257.9) — hue held to the accent's, chroma 0.013 -> 0.070, above Electric's
+     0.063 because this ground is ALREADY blue-black (h257), so the ink has to
+     separate on saturation rather than hue and needs the extra. */
+  --at-ink: #455f86; /* 2.71:1 on surface. Do not brighten */
+  --at-canvas: #0a1015; /* night yard, blue-black */
+  --at-surface: #121a21;
+  --at-surface-subtle: #182129;
+  --at-surface-raised: #1c262e;
+  --at-surface-overlay: #232e37;
+  --at-fill-hover: #182129;
+  --at-fill-active: #202b34;
+  --at-text-strong: var(--at-ink-strong);
+  --at-text: #c2d0da; /* 12.14 canvas / 11.15 surface */
+  --at-text-muted: #8b979f; /* 6.40 canvas / 5.88 surface */
+  --at-text-subtle: #6c7982; /* 4.28 on canvas */
+  --at-text-disabled: #47535b;
+  --at-accent: #3d8dff; /* oklch(0.653 0.187 257.9) — 1.2 deg off the light accent's oklch hue, the tightest mode coherence of the twelve */
+  --at-accent-hover: #74acff; /* 7.60 on surface */
+  --at-accent-wash: #061e3d; /* cut deep so the accent clears it at 5.12:1 */
+  --at-accent-rgb: 61, 141, 255;
+  --at-accent-text: var(--at-accent);
+  --at-secondary: #ffb54d; /* hazard amber lifted; secondary~danger 51.8 */
+  --at-secondary-wash: #3a2400;
+  --at-tertiary: #2fb2c6; /* patina teal lifted, h216 — holds the light teal's h218; 60.9 dE off the accent */
+  --at-tertiary-wash: #04272e;
+  --at-lime: #d9ec4f; /* hi-vis, L*89.5 */
+  --at-lime-wash: #262d06;
+  --at-success: #43b04e;
+  --at-danger: #f4574c;
+  --at-on-accent: var(--at-canvas); /* 5.88:1 */
+  --at-on-secondary: var(--at-canvas); /* 10.90:1 */
+  --at-on-tertiary: var(--at-canvas); /* 7.56:1 */
+  --at-on-lime: var(--at-canvas); /* 14.63:1 */
+  --at-on-success: var(--at-canvas); /* 6.89:1 */
+  --at-on-warning: var(--at-canvas); /* 10.90:1 */
+  --at-on-danger: var(--at-canvas); /* 5.75:1 */
+  --at-on-info: var(--at-canvas); /* 7.56:1 */
+  --at-muted: #8b979f;
+  --at-focus-ring: var(--at-accent); /* 5.88 canvas / 5.40 surface */
+  --at-link: var(--at-accent);
+  --at-link-hover: var(--at-accent-hover);
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   8. LACQUER — plum ink, blush stock, emerald chip
+   ────────────────────────────────────────────────────────────────────────
+   Playfair Display over a true didone on purpose: this display token is set at
+   11px (nav.css:310) and 13px (components.css 424/585/795/928) inside a design
+   language where every element already carries a 2px ink border, and hairline
+   serifs disappear next to that border weight. Playfair carries far more stem
+   contrast at the thin end and a real drawn 900, so it survives 11px and still
+   reads as luxury at 48px. DM Sans rather than Plus Jakarta (which Sorbet
+   holds) for a larger x-height at 12–13px table sizes.
+   ════════════════════════════════════════════════════════════════════════ */
+[data-at-theme-preset='lacquer'] {
+  --at-ink: #25121a;
+  --at-canvas: #eee4e3;
+  --at-surface: #ffffff;
+  --at-surface-subtle: #e3d9d8;
+  --at-surface-raised: #ffffff;
+  --at-surface-overlay: #ffffff;
+  --at-fill-hover: #eee4e3;
+  --at-fill-active: #d7cecd;
+  --at-border: var(--at-ink);
+  --at-border-strong: var(--at-ink);
+  --at-text-strong: var(--at-ink);
+  --at-text: #332128;
+  --at-text-muted: #6c5b61;
+  --at-text-subtle: #89777d;
+  --at-text-disabled: #b39fa6;
+  --at-accent: #006c4f;
+  --at-accent-hover: #005c43;
+  --at-accent-wash: #cde9dc;
+  --at-accent-rgb: 0, 108, 79;
+  --at-accent-text: #00654a;
+  --at-secondary: #b8801c;
+  --at-secondary-wash: #fadebd;
+  --at-tertiary: #1a61bd;
+  --at-tertiary-wash: #dbe1ff;
+  --at-lime: #a17be0;
+  --at-lime-wash: #efe3fe;
+  --at-success: #44711a;
+  --at-warning: var(--at-secondary);
+  --at-danger: #b3261e;
+  --at-info: var(--at-tertiary);
+  --at-on-accent: #ffffff;
+  --at-on-secondary: var(--at-ink);
+  --at-on-tertiary: #ffffff;
+  --at-on-lime: var(--at-ink);
+  --at-on-success: #ffffff;
+  --at-on-warning: var(--at-ink);
+  --at-on-danger: #ffffff;
+  --at-on-info: #ffffff;
+  --at-muted: #6c5b61;
+  --at-focus-ring: var(--at-accent-text);
+  --at-link: var(--at-accent-text);
+  --at-link-hover: #004d38;
+}
+[data-at-theme='dark'][data-at-theme-preset='lacquer'] {
+  --at-ink-strong: #eddcd8;
+  --at-ink: #3d6353; /* 13.83 -> 2.72:1 on surface — accent-cut emerald, oklch C 0.051 (Electric 0.063); the plum ground is the complement, so it needs less */
+  --at-canvas: #150a10;
+  --at-surface: #1f1017;
+  --at-surface-subtle: #25161d;
+  --at-surface-raised: #291a21;
+  --at-surface-overlay: #302027;
+  --at-fill-hover: #25161d;
+  --at-fill-active: #2e1e25;
+  --at-text-strong: var(--at-ink-strong);
+  --at-text: #dbccc8;
+  --at-text-muted: #9b8f8d;
+  --at-text-subtle: #7a6f6d;
+  --at-text-disabled: #524846;
+  --at-accent: #00b688;
+  --at-accent-hover: #35cc9d;
+  --at-accent-wash: #002a1c;
+  --at-accent-rgb: 0, 182, 136;
+  --at-accent-text: var(--at-accent);
+  --at-secondary: #e0a63a;
+  --at-secondary-wash: #312100;
+  --at-tertiary: #5b9bf0;
+  --at-tertiary-wash: #002446;
+  --at-lime: #bd9df0;
+  --at-lime-wash: #291e3e;
+  --at-success: #7cc242;
+  --at-danger: #f0685a;
+  --at-on-accent: var(--at-canvas);
+  --at-on-secondary: var(--at-canvas);
+  --at-on-tertiary: var(--at-canvas);
+  --at-on-lime: var(--at-canvas);
+  --at-on-success: var(--at-canvas);
+  --at-on-warning: var(--at-canvas);
+  --at-on-danger: var(--at-canvas);
+  --at-on-info: var(--at-canvas);
+  --at-muted: #9b8f8d;
+  --at-focus-ring: var(--at-accent);
+  --at-link: var(--at-accent);
+  --at-link-hover: var(--at-accent-hover);
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   9. NOCTURNE — night signage
+   ────────────────────────────────────────────────────────────────────────
+   The only dark-FIRST theme of the twelve, and the only one that unpins
+   --at-warning from --at-secondary in BOTH blocks: its secondary is an aurora
+   violet, and a violet warning chip is not a warning.
+
+   Chivo rather than Unbounded because Unbounded's extreme width forces line
+   breaks in sidebar labels and card titles at 11–13px, where this token is
+   most used. Mulish rather than Barlow for a reason specific to this preset:
+   light text on a dark ground blooms, and Barlow's narrow apertures and light
+   stems close up under that bloom.
+   ════════════════════════════════════════════════════════════════════════ */
+[data-at-theme-preset='nocturne'] {
+  --at-ink: #0c1524;
+  --at-canvas: #e3e8f2;
+  --at-surface: #ffffff;
+  --at-surface-subtle: #d8dde7;
+  --at-surface-raised: #ffffff;
+  --at-surface-overlay: #ffffff;
+  --at-fill-hover: #e3e8f2;
+  --at-fill-active: #cdd1db;
+  --at-border: var(--at-ink);
+  --at-border-strong: var(--at-ink);
+  --at-text-strong: var(--at-ink);
+  --at-text: #1c2331;
+  --at-text-muted: #5b606e;
+  --at-text-subtle: #777c8b;
+  --at-text-disabled: #a0a5b5;
+  --at-accent: #50cbff; /* was #00befc — L*72.1 -> 77.1; ink on fill 8.51 -> 9.86 */
+  --at-accent-hover: #29b5ed; /* keeps the 8-L* step (dE 8.4 from accent); ink 7.77 */
+  --at-accent-wash: #c6e7fd;
+  --at-accent-rgb: 80, 203, 255;
+  --at-accent-text: #0a6790;
+  --at-secondary: #c45ff0;
+  --at-secondary-wash: #f5d9ff;
+  --at-tertiary: #256bab;
+  --at-tertiary-wash: #d6e3fc;
+  --at-lime: #4bda79;
+  --at-lime-wash: #c9f3cf;
+  --at-success: #17752f;
+  --at-warning: #e8b02a; /* unpinned from --at-secondary — see the block note */
+  --at-danger: #c5221f;
+  --at-info: var(--at-tertiary);
+  --at-on-accent: var(--at-ink);
+  --at-on-secondary: var(--at-ink);
+  --at-on-tertiary: #ffffff;
+  --at-on-lime: var(--at-ink);
+  --at-on-success: #ffffff;
+  --at-on-warning: var(--at-ink);
+  --at-on-danger: #ffffff;
+  --at-on-info: #ffffff;
+  --at-muted: #5b606e;
+  --at-focus-ring: var(--at-accent-text);
+  --at-link: var(--at-accent-text);
+  --at-link-hover: #075172;
+}
+[data-at-theme='dark'][data-at-theme-preset='nocturne'] {
+  --at-ink-strong: #cfdbf0;
+  --at-ink: #535d70; /* 12.82 -> 2.70:1 on surface */
+  --at-canvas: #070d1a;
+  --at-surface: #0f1728;
+  --at-surface-subtle: #151d2e;
+  --at-surface-raised: #1a2133;
+  --at-surface-overlay: #202739;
+  --at-fill-hover: #151d2e;
+  --at-fill-active: #1e2537;
+  --at-text-strong: var(--at-ink-strong);
+  --at-text: #c0cadd;
+  --at-text-muted: #8a92a1;
+  --at-text-subtle: #6a7280;
+  --at-text-disabled: #434a57;
+  --at-accent: #65ccff;
+  --at-accent-hover: #a8deff;
+  --at-accent-wash: #002738;
+  --at-accent-rgb: 101, 204, 255;
+  --at-accent-text: var(--at-accent);
+  --at-secondary: #d98cf5;
+  --at-secondary-wash: #351741;
+  --at-tertiary: #3f7fcc;
+  --at-tertiary-wash: #052444;
+  --at-lime: #5fe38c;
+  --at-lime-wash: #002b10;
+  --at-success: #2f9e5c;
+  --at-warning: #f0bf4a; /* unpinned in both blocks — the only preset that does */
+  --at-danger: #ff6b6b;
+  --at-on-accent: var(--at-canvas);
+  --at-on-secondary: var(--at-canvas);
+  --at-on-tertiary: var(--at-canvas);
+  --at-on-lime: var(--at-canvas);
+  --at-on-success: var(--at-canvas);
+  --at-on-warning: var(--at-canvas);
+  --at-on-danger: var(--at-canvas);
+  --at-on-info: var(--at-canvas);
+  --at-muted: #8a92a1;
+  --at-focus-ring: var(--at-accent);
+  --at-link: var(--at-accent);
+  --at-link-hover: var(--at-accent-hover);
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   10. PRIMER — navy on manila, and the same card under no light
+   ────────────────────────────────────────────────────────────────────────
+   The light mode is a manila drafting card with navy printed on it. The dark
+   mode is that ground burnt down rather than that ink inverted: the sepia
+   ladder below is Primer light's --at-canvas #f3e0c6 taken down in lightness
+   at the same oklch hue, because what carries Primer's identity in light is
+   the CREAM FIELD, not the navy.
+   ════════════════════════════════════════════════════════════════════════ */
+[data-at-theme-preset='primer'] {
+  --at-ink: #09203d; /* oklch(0.243 0.063 255.7) — already accent-cut ink, which is what the dark block matches */
+  --at-canvas: #f3e0c6;
+  --at-surface: #ffffff;
+  --at-surface-subtle: #e7d5bb;
+  --at-surface-raised: #ffffff;
+  --at-surface-overlay: #ffffff;
+  --at-fill-hover: #f3e0c6;
+  --at-fill-active: #dccab0;
+  --at-border: var(--at-ink);
+  --at-border-strong: var(--at-ink);
+  --at-text-strong: var(--at-ink);
+  --at-text: #1f2e4a;
+  --at-text-muted: #535d77;
+  --at-text-subtle: #6e7894;
+  --at-text-disabled: #96a1bd;
+  --at-accent: #235897;
+  --at-accent-hover: #034a87;
+  --at-accent-wash: #d9e2fc;
+  --at-accent-rgb: 35, 88, 151;
+  --at-accent-text: #235897;
+  --at-secondary: #f5c25e;
+  --at-secondary-wash: #f6dfbe;
+  --at-tertiary: #1e7078;
+  --at-tertiary-wash: #d0e7e9;
+  --at-lime: #bb9ceb;
+  --at-lime-wash: #efe3fe;
+  --at-success: #43701f;
+  --at-warning: var(--at-secondary);
+  --at-danger: #b32d1f;
+  --at-info: var(--at-tertiary);
+  --at-on-accent: #ffffff;
+  --at-on-secondary: var(--at-ink);
+  --at-on-tertiary: #ffffff;
+  --at-on-lime: var(--at-ink);
+  --at-on-success: #ffffff;
+  --at-on-warning: var(--at-ink);
+  --at-on-danger: #ffffff;
+  --at-on-info: #ffffff;
+  --at-muted: #535d77;
+  --at-focus-ring: var(--at-accent-text);
+  --at-link: var(--at-accent-text);
+  --at-link-hover: #17406f;
+}
+[data-at-theme='dark'][data-at-theme-preset='primer'] {
+  --at-ink-strong: #f3e0c6; /* = Primer light's --at-canvas, verbatim. L*90.1 C15.3 h81. 12.67:1 on surface */
+  /* The impression, re-cut from --at-accent — and this one costs nothing to
+     argue for, because Primer light ALREADY prints in accent-cut ink. Its
+     #09203d is oklch(0.243 0.063 255.7): chroma 0.063 sitting on the accent's
+     own hue. So the dark ink is not an analogy to the light one, it is the
+     same ink at a second lightness — hue 256.9 vs 255.7, chroma 0.064 vs
+     0.063, and only oklch L moves (0.243 -> 0.498). Navy on manila becomes
+     blued steel on scorched card.
+
+     Cut off the previous neutral #696257 at held luminance, the house move:
+     contrast between the two is 1.00:1, so the printed weight is provably
+     unchanged and only the colour rotated. Unlike Gantry — where the ink had
+     to separate on saturation because that ground is already blue and needed
+     chroma 0.070 — this ground is warm (h75-80), so a full hue rotation does
+     the work on its own: dE to the surface goes 30.4 -> 46.2 at a chroma the
+     light mode already sanctions.
+
+     It lands dE 3.3 from Gantry dark's ink, which sounds close and is not: ink
+     is never seen except pressed onto its own ground, and blue-on-sepia at
+     dE 46 reads nothing like Gantry's blue-on-blue-black at dE 21. */
+  --at-ink: #4b6487; /* oklch(0.498 0.064 256.9). 2.70:1 on surface, 2.97 on canvas. Do not brighten */
+  /* The sepia ladder. Every oklch LIGHTNESS is byte-identical to the navy one
+     it replaces — only hue and chroma moved, which is what let --at-ink-strong
+     and all four --at-text-* tokens ride through the rotation untouched
+     (12.67 / 10.88 / 5.51 / 3.61 on surface, unchanged to two decimals).
+
+     Warm dark grounds are crowded — Stencil #13100a/#1d1912 (h85-87, Lab C
+     3-5) and Foundry #18110a/#22180e (h66, C 5-9) are both here. Primer sits
+     between them on hue and above both on chroma (Lab C 9.1/13.4), a proper
+     sepia rather than soot, and it is the only one of the three with a BLUE
+     accent — which is the separation that actually matters at a glance. */
+  --at-canvas: #1f1507; /* oklch(0.205 0.030 74.7). Lab L*7.6 C9.1 h72 */
+  --at-surface: #291e0c; /* oklch(0.243 0.034 78.3). Lab L*12.1 C13.4 h79 */
+  --at-surface-subtle: #302413; /* oklch(0.270 0.034) */
+  --at-surface-raised: #342817; /* oklch(0.286 0.033) */
+  --at-surface-overlay: #3b2f1d; /* oklch(0.313 0.034) */
+  --at-fill-hover: #302413;
+  --at-fill-active: #392d1b; /* oklch(0.306 0.034) */
+  --at-text-strong: var(--at-ink-strong);
+  --at-text: #dad2c3;
+  --at-text-muted: #9c958a;
+  --at-text-subtle: #7b766a;
+  --at-text-disabled: #534e43;
+  /* Same blue, chalked back. Hue and lightness held exactly (oklch L 0.675,
+     h 256), only chroma comes off: 0.159 -> 0.120, against Primer LIGHT's
+     accent at oklch C 0.117 — the same blue at two lightnesses, which is what
+     a mode pair is supposed to be.
+
+     It also fixes a collision. Primer and Gantry both went blue independently
+     and landed dE 12.0 apart. Primer is the one that yields — Gantry's blue
+     matches its own blue ground and has nowhere to go — but Primer is boxed in
+     on the other side by Nocturne (#65ccff), so this is a squeeze: chroma
+     0.120 is the balance point, dE 25.1 off Gantry and 25.4 off Nocturne.
+     Cutting further helps Gantry and costs Nocturne one-for-one. */
+  --at-accent: #6398df; /* Lab L*62.0 C41.5 h274. canvas on it 6.06:1, surface 5.51 — both unchanged from the cobalt it replaces; the cut is pure chroma */
+  --at-accent-hover: #85b1ec; /* one step lighter, chroma cut in the same 0.755 proportion. 7.39:1 on surface */
+  /* The wash stays BLUE on the warm ground, and that is the point. Light
+     Primer's #d9e2fc sits on its cream canvas at contrast 1.00:1 and dE 28.7 —
+     identical lightness, opposite hue. This mirrors it: 1.10:1 and dE 27.7 off
+     the surface, at oklch chroma 0.040 against the light wash's 0.037, offset
+     +15 deg off the accent hue exactly as the light pair is. */
+  --at-accent-wash: #21273c; /* oklch(0.277 0.040 271.4). accent on it 4.99:1 */
+  --at-accent-rgb: 99, 152, 223;
+  --at-accent-text: var(--at-accent);
+  --at-secondary: #f7cd76;
+  --at-secondary-wash: #2f2200;
+  --at-tertiary: #3fa8b0;
+  --at-tertiary-wash: #00292c;
+  --at-lime: #c79bf5;
+  --at-lime-wash: #2c1c3f;
+  --at-success: #7fbe45;
+  --at-danger: #ef6a5a;
+  --at-on-accent: var(--at-canvas);
+  --at-on-secondary: var(--at-canvas);
+  --at-on-tertiary: var(--at-canvas);
+  --at-on-lime: var(--at-canvas);
+  --at-on-success: var(--at-canvas);
+  --at-on-warning: var(--at-canvas);
+  --at-on-danger: var(--at-canvas);
+  --at-on-info: var(--at-canvas);
+  --at-muted: #9c958a;
+  --at-focus-ring: var(--at-accent);
+  --at-link: var(--at-accent);
+  --at-link-hover: var(--at-accent-hover);
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   11. SORBET — blush stock, candy chip
+   ════════════════════════════════════════════════════════════════════════ */
+[data-at-theme-preset='sorbet'] {
+  --at-ink: #2b1630;
+  --at-canvas: #fdf0f4;
+  --at-surface: #ffffff;
+  --at-surface-subtle: #f1e5e9;
+  --at-surface-raised: #ffffff;
+  --at-surface-overlay: #ffffff;
+  --at-fill-hover: #fdf0f4;
+  --at-fill-active: #e6d9dd;
+  --at-border: var(--at-ink);
+  --at-border-strong: var(--at-ink);
+  --at-text-strong: var(--at-ink);
+  --at-text: #39263e;
+  --at-text-muted: #746077;
+  --at-text-subtle: #917e95;
+  --at-text-disabled: #bca7c0;
+  --at-accent: #fc85f0;
+  --at-accent-hover: #e46fd9;
+  --at-accent-wash: #fed7f8;
+  --at-accent-rgb: 252, 133, 240;
+  --at-accent-text: #a3308f;
+  --at-secondary: #fec89a;
+  --at-secondary-wash: #f3dfcf;
+  --at-tertiary: #2a6dbb;
+  --at-tertiary-wash: #d8e2fe;
+  --at-lime: #a0d747;
+  --at-lime-wash: #dfeebf;
+  --at-success: #2f7a35;
+  --at-warning: var(--at-secondary);
+  --at-danger: #c62828;
+  --at-info: var(--at-tertiary);
+  --at-on-accent: var(--at-ink);
+  --at-on-secondary: var(--at-ink);
+  --at-on-tertiary: #ffffff;
+  --at-on-lime: var(--at-ink);
+  --at-on-success: #ffffff;
+  --at-on-warning: var(--at-ink);
+  --at-on-danger: #ffffff;
+  --at-on-info: #ffffff;
+  --at-muted: #746077;
+  --at-focus-ring: var(--at-accent-text);
+  --at-link: var(--at-accent-text);
+  --at-link-hover: #872475;
+}
+[data-at-theme='dark'][data-at-theme-preset='sorbet'] {
+  --at-ink-strong: #f0dced;
+  --at-ink: #726173; /* 11.82 -> 2.69:1 on surface */
+  --at-canvas: #241826;
+  --at-surface: #2e2031;
+  --at-surface-subtle: #352638;
+  --at-surface-raised: #392b3c;
+  --at-surface-overlay: #403143;
+  --at-fill-hover: #352638;
+  --at-fill-active: #3e2f41;
+  --at-text-strong: var(--at-ink-strong);
+  --at-text: #deccdb;
+  --at-text-muted: #a698a4;
+  --at-text-subtle: #847682;
+  --at-text-disabled: #5c4f5a;
+  --at-accent: #faadf0;
+  --at-accent-hover: #ffcdf7;
+  --at-accent-wash: #361933;
+  --at-accent-rgb: 250, 173, 240;
+  --at-accent-text: var(--at-accent);
+  --at-secondary: #ffcfa0;
+  --at-secondary-wash: #31200e;
+  --at-tertiary: #6aa9f0;
+  --at-tertiary-wash: #032541;
+  --at-lime: #b8e05c;
+  --at-lime-wash: #1e2700;
+  --at-success: #5fc26b;
+  --at-danger: #ff7a7a;
+  --at-on-accent: var(--at-canvas);
+  --at-on-secondary: var(--at-canvas);
+  --at-on-tertiary: var(--at-canvas);
+  --at-on-lime: var(--at-canvas);
+  --at-on-success: var(--at-canvas);
+  --at-on-warning: var(--at-canvas);
+  --at-on-danger: var(--at-canvas);
+  --at-on-info: var(--at-canvas);
+  --at-muted: #a698a4;
+  --at-focus-ring: var(--at-accent);
+  --at-link: var(--at-accent);
+  --at-link-hover: var(--at-accent-hover);
+}

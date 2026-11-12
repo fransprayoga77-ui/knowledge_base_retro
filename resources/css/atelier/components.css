@@ -1,0 +1,2043 @@
+/* ════════════════════════════════════════════════════════════════════════
+   components.css — the component library, Bold Press · spec 05
+   Wrapped in @layer components so Tailwind utilities + page overrides win.
+   Every component uses only --at-* tokens. No hardcoded values.
+   ════════════════════════════════════════════════════════════════════════ */
+@layer components {
+  /* ══ §1 Buttons — .at-btn ══
+     Uniform 2px ink rim on all four sides, plus the hard offset shadow. The
+     shadow alone does the grounding: :active flattens it and translates the
+     block the full 3px, landing the face exactly in its own imprint. (This
+     border was asymmetric — 1.5 top / 2 sides / 4 bottom — for a weighted-lip
+     read; the even rim keeps border and shadow as one printed impression.) */
+  .at-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--at-space-2);
+    height: var(--at-control-md);
+    padding-inline: var(--at-space-4);
+    font-family: var(--at-font-sans);
+    font-size: var(--at-text-sm);
+    font-weight: var(--at-weight-semibold);
+    line-height: 1;
+    border-top-width: var(--at-border-w-top);
+    border-inline-width: var(--at-border-w-side);
+    border-bottom-width: var(--at-border-w-bottom);
+    border-style: solid;
+    border-color: var(--at-ink);
+    border-radius: var(--at-radius-sm);
+    /* Composed from offset + colour rather than the packed --at-shadow-3, so a
+       variant or a context can re-ink the offset block on its own without
+       restating the geometry. Ink is the default; see the token comment in
+       _primitives.css for why the composition has to happen here.
+
+       --at-shadow-focus leads the list: the counter-print, inert until
+       :focus-visible swaps it in (tokens/_recipes.css). It rides here rather
+       than being assigned by the focus rule because box-shadow is one property
+       and the cascade cannot append to it — a focus rule that assigned the
+       print would take the offset block with it and the button would go flat
+       the instant it was tabbed to. Every state below carries the layer for
+       the same reason: drop it from one and focus disappears in that state. */
+    box-shadow: var(--at-shadow-focus), var(--at-shadow-off-3) var(--at-shadow-color);
+    background: var(--at-surface);
+    /* The label is TYPE, not an edge — it reads --at-ink-strong so it holds
+       full weight when the impression dims in dark. See _roles.css contract 1.
+       --primary, --dark and the disabled plate all declare their own colour
+       later in this file, so they are unaffected. */
+    color: var(--at-ink-strong);
+    white-space: nowrap;
+    user-select: none;
+    cursor: pointer;
+    transition:
+      transform var(--at-motion-instant) var(--at-ease-emphasized),
+      box-shadow var(--at-motion-instant) var(--at-ease-emphasized),
+      background var(--at-motion-fast) var(--at-ease-standard),
+      color var(--at-motion-fast) var(--at-ease-standard);
+  }
+  /* The press is intrinsic to the button, matching .at-icon-btn below. It used
+     to be opt-in per element via .at-press in the markup, which meant a button
+     was only pressable if someone remembered the class — 98 of them across the
+     template were shipped without it and sat dead next to identical siblings
+     that animated.
+
+     The geometry follows the one law the Bold Press shadows encode: the hard
+     shadow's outer edge stays pinned to where it rests, so the block travels
+     and the shadow does not. Resting elevation is --at-shadow-3 (3px), so
+       hover  = lift 1px + grow the shadow to 4px  → outer edge stays at 3px
+       active = travel the full 3px + drop the shadow → the block lands exactly
+                where its own shadow was, which is what makes the press read as
+                a stamp rather than a slip.
+     The old shared .at-press:active travelled 2px against that 3px shadow and
+     stopped a pixel short of landing. */
+  .at-btn:hover {
+    color: var(--at-ink-strong);
+    transform: translate(-1px, -1px);
+    box-shadow: var(--at-shadow-focus), var(--at-shadow-off-4) var(--at-shadow-color);
+  }
+  /* --at-shadow-press is `none`, and `none` cannot sit in a shadow list, so
+     the pressed state is written as the focus layer alone — which resolves to
+     the same nothing on a button that isn't focused. */
+  .at-btn:active {
+    transform: translate(3px, 3px);
+    box-shadow: var(--at-shadow-focus);
+  }
+  .at-btn--primary {
+    background: var(--at-accent);
+    color: var(--at-on-accent);
+  }
+  .at-btn--primary:hover {
+    color: var(--at-on-accent);
+  }
+  /* The one variant that is filled with the shadow colour. Left on the default
+     it printed an ink block behind an ink field, so the button and its shadow
+     fused into a single lopsided silhouette — no visible offset, and the press
+     read as the block shrinking rather than landing.
+
+     The offset block moves to the second ink instead. That is the letterpress
+     answer (a black plate's shadow is printed in the other colour on the run,
+     never in more black) and it holds in every preset and both themes, since
+     accent is never near ink. Where the panel itself is accent, the block
+     re-inks to --at-canvas locally — see .at-sidebar__cta in nav.css. */
+  /* A solid fill whose foreground is --at-canvas, so it takes --at-ink-strong:
+     dimming the plate to impression weight would collapse the text on top of
+     it, not just soften an edge. Its border-color goes with the fill — an
+     impression-weight rim around a full-strength block reads as a rendering
+     seam rather than an edge, and the letterpress idiom wants a filled plate
+     to be one solid mass. The *shadow* still drops to impression weight, so
+     the offset is unchanged. */
+  .at-btn--dark {
+    --at-shadow-color: var(--at-accent);
+    background: var(--at-ink-strong);
+    border-color: var(--at-ink-strong);
+    color: var(--at-canvas);
+  }
+  .at-btn--dark:hover {
+    color: var(--at-canvas);
+  }
+  .at-btn--outline {
+    background: transparent;
+  }
+  /* Ghost has no border and no resting shadow, so it has nothing to lift off
+     of — the shared lift used to hang a solid 4px ink block behind a button
+     with a transparent border, a shadow cast by an edge that isn't drawn. It
+     answers with fill instead: wash on hover, a deeper wash on press. */
+  .at-btn--ghost {
+    background: transparent;
+    box-shadow: none;
+    border-color: transparent;
+  }
+  .at-btn--ghost:hover {
+    background: var(--at-fill-hover);
+    transform: none;
+    box-shadow: var(--at-shadow-none);
+  }
+  .at-btn--ghost:active {
+    background: var(--at-fill-active);
+    transform: none;
+    box-shadow: var(--at-shadow-none);
+  }
+  .at-btn--sm {
+    height: var(--at-control-sm);
+    padding-inline: var(--at-space-3);
+    font-size: var(--at-text-xs);
+  }
+  .at-btn--lg {
+    height: var(--at-control-lg);
+    padding-inline: var(--at-space-5);
+    font-size: var(--at-text-md);
+  }
+  /* The uninked plate. Disabled has no variant identity — a control you
+     cannot press has nothing to say about how important it would have been —
+     so all three variants collapse onto one dead block.
+
+     Overriding `background` is the whole fix. Without it the rule only
+     drained the border and the label, so --primary kept its full-strength
+     accent fill and --dark kept its ink fill: a button that looked entirely
+     live, wearing a washed-out label. On the accent fill that label ran about
+     1.3:1, unreadable, and the button read as broken rather than unavailable.
+
+     The label is --at-text-subtle, not --at-text-disabled: on this fill the
+     disabled ink is 1.97:1 and simply cannot be read, while subtle is 3.5:1 —
+     clearly recessed, still legible. You must be able to read what a button
+     says even when you can't press it. The rim keeps --at-text-disabled,
+     which is the fainter of the two, so the plate's outline describes the
+     shape without competing with its own label.
+
+     No shadow, and never any travel. Flat is the tell: everything pressable
+     in this system sits on an offset block, so a block sitting flush with the
+     page cannot be pressed. */
+  .at-btn:disabled,
+  .at-btn[disabled] {
+    background: var(--at-surface-subtle);
+    color: var(--at-text-subtle);
+    border-color: var(--at-text-disabled);
+    box-shadow: var(--at-shadow-none);
+    pointer-events: none;
+    transform: none;
+    cursor: default;
+  }
+  /* Ghost is chromeless by definition — giving it the plate would make its
+     disabled state louder than its resting one. It drains in place. */
+  .at-btn--ghost:disabled,
+  .at-btn--ghost[disabled] {
+    background: transparent;
+    border-color: transparent;
+  }
+  .at-btn--block {
+    width: 100%;
+  }
+  /* icon-only button */
+  .at-btn--icon {
+    width: var(--at-control-sm);
+    height: var(--at-control-sm);
+    padding: 0;
+  }
+  /* The icon button is a pressable control, so the press is intrinsic here
+     rather than an opt-in .at-press — every .at-icon-btn in the header, footer,
+     sidebar and tables now depresses identically.
+
+     Three deliberate differences from the .at-press recipe:
+
+     1. Hover lifts 1px, press travels 2px — the same geometry .at-header__user
+        (shell.css) has carried since it shipped, and that pill sits at the end
+        of this very header row. These were originally press-only, on the
+        argument that a row of eight lifting under the cursor reads as noise.
+        But the cursor is over one of them at a time, and the pill next door had
+        already proved the lift reads as an answer rather than as noise in
+        exactly this row. What press-only actually bought was the one control in
+        the template that stayed inert until it was clicked.
+     2. The offset rides on top/left (the element is already relatively
+        positioned) instead of a transform. A transformed element becomes the
+        containing block for its position:fixed descendants, and these buttons
+        host the floating-ui-positioned .at-dropdown panel — a transform would
+        yank an open panel across the screen. Relative offsets create no
+        containing block, so the panel stays put.
+     3. :active drops the shadow entirely rather than stepping down a notch,
+        because the resting elevation here is --at-shadow-2: +2px with no shadow
+        lands the block exactly where its shadow was. */
+  .at-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--at-control-sm);
+    height: var(--at-control-sm);
+    border-top-width: var(--at-border-w-top);
+    border-inline-width: var(--at-border-w-side);
+    border-bottom-width: var(--at-border-w-bottom);
+    border-style: solid;
+    border-color: var(--at-ink);
+    border-radius: var(--at-radius-sm);
+    /* Rests on a 2px block, so its counter-print is re-declared at 2px — the
+       two strikes have to be in register with each other or the focus mark
+       reads as heavier than the elevation it belongs to. */
+    --at-focus-print: -2px -2px 0;
+    box-shadow: var(--at-shadow-focus), var(--at-shadow-2);
+    background: var(--at-surface);
+    color: var(--at-ink-strong); /* the glyph is type — see .at-btn above */
+    position: relative;
+    /* The press below rides on top/left, so both need a declared resting value.
+       Left undeclared they compute to `auto`, and `auto` → `2px` is not
+       interpolatable: the transition silently never runs and the press snaps
+       to its end state. It reads as correct in devtools because
+       getComputedStyle resolves `auto` to 0px on a positioned box — the tell is
+       that no transitionstart event ever fires. */
+    top: 0;
+    left: 0;
+    cursor: pointer;
+    /* Two clocks, split by property class rather than by state — the same split
+       .at-btn and .at-menu-toggle already run. Geometry (the lift, the shadow
+       that tracks it) rides the instant/emphasized pair so the block answers
+       the cursor; the fill rides the slower standard pair, because a wash that
+       snaps in as fast as the movement reads as a flicker behind it. */
+    transition:
+      top var(--at-motion-instant) var(--at-ease-emphasized),
+      left var(--at-motion-instant) var(--at-ease-emphasized),
+      box-shadow var(--at-motion-instant) var(--at-ease-emphasized),
+      background var(--at-motion-fast) var(--at-ease-standard);
+  }
+  /* The same law the whole system's shadows encode: the hard shadow's outer
+     edge stays pinned where it rests, so the block travels and the shadow does
+     not. Resting elevation is --at-shadow-2, so
+       hover  = lift 1px + grow the block to 3px  → outer edge stays at 2px
+       active = travel the full 2px + drop the shadow → the block lands exactly
+                where its own shadow was.
+     --at-shadow-focus rides in both, for the reason given on the resting rule:
+     drop the layer from a state and focus disappears in that state.
+
+     (hover: hover) — a touch device latches :hover on tap, which would strand
+     one button 1px high in a row of six identical ones until something else
+     was tapped. Far more legible as a defect here than on a lone card. */
+  @media (hover: hover) {
+    .at-icon-btn:hover {
+      top: -1px;
+      left: -1px;
+      box-shadow: var(--at-shadow-focus), var(--at-shadow-3);
+    }
+  }
+  /* The wash sits outside that guard on purpose. The lift is the half that
+     misbehaves on touch — it latches and strands a button 1px proud of its
+     row — while a fill that stays put until the next tap reads as "this is the
+     one you touched", which is the only hover feedback a touch device can
+     honestly give. Same division .at-menu-toggle draws in shell.css.
+
+     --at-fill-hover, not a new colour: it is the house wash, carried by
+     .at-btn--ghost, .at-command__item and the sidebar links, and it is defined
+     per preset for all 12 themes in both light and dark. The resting fill here
+     is always --at-surface (the class ships with no variants and no companion
+     background anywhere in the template), so one wash covers every instance. */
+  .at-icon-btn:hover {
+    background: var(--at-fill-hover);
+  }
+  .at-icon-btn:active {
+    top: 2px;
+    left: 2px;
+    box-shadow: var(--at-shadow-focus);
+  }
+  /* An open popper must not wobble. The .at-dropdown panel is a DOM descendant
+     of its trigger and floating-ui's autoUpdate watches the reference for
+     layout shift, so 2px of press travel here drags the open panel with it.
+     While the panel is open the press therefore reads without moving: the
+     shadow flattens, the block stays put. Same compromise the reduced-motion
+     guard below makes — the state still reads, it just doesn't travel.
+
+     (The earlier form of this rule suppressed the shadow change too, which
+     left the trigger completely dead from the second click onward: it answered
+     the click that opened the panel and then never again, including the click
+     that closes it.)
+
+     The hover lift is held the same way, and gives up its travel outright: a
+     1px nudge under an open menu is noise, not feedback, and floating-ui
+     follows the reference just as readily for 1px as for 2. Both selectors are
+     (0,3,0), so the press below has to stay last in source order to win the
+     tie — pressing implies hovering. Same resolution .at-header__user reached.
+
+     aria-expanded is the state every dropdown in the template publishes. */
+  @media (hover: hover) {
+    .at-icon-btn[aria-expanded='true']:hover {
+      top: 0;
+      left: 0;
+      box-shadow: var(--at-shadow-focus), var(--at-shadow-2);
+    }
+  }
+  .at-icon-btn[aria-expanded='true']:active {
+    top: 0;
+    left: 0;
+    box-shadow: var(--at-shadow-focus);
+  }
+  /* …except when the press started inside the panel. :active propagates to
+     ancestors, so pressing a menu item matches :active on the trigger as well,
+     and the trigger must not flash for a press that was never aimed at it.
+     Pressing the trigger itself leaves .at-dropdown unpressed, so this catches
+     only the item case and the closing click keeps its feedback. */
+  .at-icon-btn[aria-expanded='true']:active:has(.at-dropdown:active) {
+    box-shadow: var(--at-shadow-focus), var(--at-shadow-2);
+  }
+  /* Same uninked plate as .at-btn — see the note there. */
+  .at-icon-btn:disabled,
+  .at-icon-btn[disabled] {
+    background: var(--at-surface-subtle);
+    color: var(--at-text-subtle);
+    border-color: var(--at-text-disabled);
+    box-shadow: var(--at-shadow-none);
+    pointer-events: none;
+    top: 0;
+    left: 0;
+  }
+  /* Same policy as .at-press — the state still reads (shadow flattens, fill
+     swaps), it just doesn't travel. Mirrors the guard in tokens/_recipes.css,
+     and covers every control that owns a press in this file. */
+  @media (prefers-reduced-motion: reduce) {
+    .at-icon-btn:hover,
+    .at-icon-btn:active {
+      top: 0;
+      left: 0;
+    }
+    .at-btn:hover,
+    .at-btn:active,
+    .at-pagination__btn:active,
+    .at-tabs--pills .at-tabs__tab:active {
+      transform: none;
+    }
+  }
+  .at-icon-btn svg {
+    width: var(--at-icon-sm);
+    height: var(--at-icon-sm);
+  }
+
+  /* ══ §2 Button group / segmented ══
+     Both shells own the border and the shadow and clip their children with
+     overflow: hidden, so a member button must not travel or cast anything of
+     its own: a lift would slide one segment out from under the shared frame
+     and tear the seam between it and its neighbour, and any shadow it grew
+     would be clipped away unseen. The shell is the block that presses; the
+     members answer with fill. */
+  .at-btn-group {
+    display: inline-flex;
+    border: var(--at-border-w) solid var(--at-ink);
+    border-radius: var(--at-radius-sm);
+    box-shadow: var(--at-shadow-3);
+    overflow: hidden;
+  }
+  .at-btn-group .at-btn {
+    border: none;
+    border-inline-end: var(--at-border-w-sm) solid var(--at-ink);
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .at-btn-group .at-btn:hover,
+  .at-btn-group .at-btn:active {
+    transform: none;
+    box-shadow: none;
+    background: var(--at-fill-hover);
+  }
+  .at-btn-group .at-btn:active {
+    background: var(--at-fill-active);
+  }
+  .at-btn-group .at-btn:last-child {
+    border-inline-end: none;
+  }
+  /* flex-shrink:0 is load-bearing next to the overflow:hidden above. The
+     hidden overflow is only there to clip the child buttons to the rounded
+     border, but it also means a squeezed segment loses its last options
+     silently — as a flex item with the default shrink factor the control was
+     compressed to ~100px in the calendar toolbar and "Day" and "List" simply
+     vanished, with nothing to scroll or click. Holding its intrinsic width
+     makes the parent wrap instead, which is the recoverable failure. */
+  .at-segment {
+    display: inline-flex;
+    border: var(--at-border-w) solid var(--at-ink);
+    border-radius: var(--at-radius-sm);
+    overflow: hidden;
+    box-shadow: var(--at-shadow-2);
+    flex-shrink: 0;
+  }
+  .at-segment__btn {
+    padding: var(--at-space-2) var(--at-space-3);
+    font-size: var(--at-text-sm);
+    font-weight: var(--at-weight-semibold);
+    background: var(--at-surface);
+    color: var(--at-text);
+    border: none;
+    border-inline-end: var(--at-border-w-sm) solid var(--at-ink);
+    border-radius: 0;
+    box-shadow: none;
+    cursor: pointer;
+    transition: background var(--at-motion-fast) var(--at-ease-standard);
+  }
+  .at-segment__btn:last-child {
+    border-inline-end: none;
+  }
+  .at-segment__btn:hover {
+    background: var(--at-fill-hover);
+  }
+  .at-segment__btn:active {
+    background: var(--at-fill-active);
+  }
+  .at-segment__btn.is-active {
+    background: var(--at-accent);
+    color: var(--at-on-accent);
+  }
+  /* The selected segment is already the accent block — it must not wash over
+     on hover, or the control loses which one is selected mid-interaction. */
+  .at-segment__btn.is-active:hover,
+  .at-segment__btn.is-active:active {
+    background: var(--at-accent);
+  }
+
+  /* ══ §4 KPI widget — .at-kpi ══
+     A read-only surface: a KPI card reports a number, it does not go anywhere
+     and nothing happens when you click it. So it deliberately carries no
+     .at-press — the press is a promise of action, and a card that depresses
+     under the pointer without acting reads as a broken link. Pair .at-kpi with
+     .at-press only if you also wrap the card in an <a>. */
+  .at-kpi {
+    padding: var(--at-space-5);
+  }
+  /* Head row: icon tile on the start edge, delta pill on the end edge. Used by
+     the sparkline variant below, but valid on a plain KPI too. */
+  .at-kpi__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--at-space-3);
+    margin-block-end: var(--at-space-4);
+  }
+  .at-kpi__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border: var(--at-border-w) solid var(--at-ink);
+    border-radius: var(--at-radius-sm);
+    background: var(--at-accent-wash);
+    color: var(--at-text-strong);
+    box-shadow: var(--at-shadow-2);
+  }
+  .at-kpi__icon svg {
+    width: var(--at-icon-md);
+    height: var(--at-icon-md);
+  }
+  .at-kpi__label {
+    font-size: var(--at-text-2xs);
+    font-weight: var(--at-weight-2xs);
+    letter-spacing: var(--at-tracking-2xs);
+    text-transform: uppercase;
+    color: var(--at-text-muted);
+  }
+  .at-kpi__value {
+    font-family: var(--at-font-mono);
+    font-size: var(--at-num-kpi);
+    line-height: var(--at-leading-kpi);
+    font-weight: var(--at-weight-kpi);
+    letter-spacing: var(--at-tracking-kpi);
+    color: var(--at-text-strong);
+    margin-block: var(--at-space-2);
+  }
+  .at-kpi__delta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--at-space-1);
+    font-size: var(--at-text-xs);
+    font-weight: var(--at-weight-semibold);
+  }
+  .at-kpi__delta--up {
+    color: var(--at-success-text);
+  }
+  .at-kpi__delta--down {
+    color: var(--at-danger-text);
+  }
+  /* Inline trend line under the value — the shape of the number, not its scale.
+     Feed it `data-at-chart-type="line" data-at-chart-sparkline="true"` and the
+     apex wrapper strips the axes, grid and padding, leaving the bare smooth
+     stroke (plugins/charts.js already sets curve:smooth / lineCap:round for
+     every cartesian chart, which is what gives it the rounded ribbon read).
+
+     No height here on purpose: `data-at-chart-height` is what sizes it, exactly
+     as it does for .at-chart__body and the crypto watchlist sparks. The wrapper
+     writes that value to the element's inline min-height to reserve space
+     before apex loads, and a min-height always beats a CSS height — so a fixed
+     height in this rule would be silently overridden and the two numbers would
+     drift apart. One source of truth, in the markup. */
+  .at-kpi__sparkline {
+    margin-block-start: var(--at-space-4);
+    margin-block-end: calc(var(--at-space-2) * -1);
+    min-width: 0;
+    overflow: hidden;
+  }
+  /* Apex injects an absolutely-positioned canvas sized to its container; cap it
+     so a sparkline can never force the KPI card wider than its grid track. */
+  .at-kpi__sparkline .apexcharts-canvas {
+    max-width: 100%;
+  }
+
+  /* ══ §4b Balance plate — .at-balance ══
+     The bank-card visual on the finance, sales and crypto dashboards. It was a
+     135° accent→olive gradient, which is the one thing this language rules out:
+     colour here is flat and unmodulated. Modulating it also dragged the plate
+     through the muddy middle where terracotta meets olive, so it read as a
+     smudge rather than a printed block.
+
+     It now uses the inversion .at-btn--dark already establishes — ink field,
+     canvas type. That tracks every preset and flips correctly in dark mode,
+     where ink is the light token and canvas the dark one, without a single
+     hard-coded colour. Accent survives as the chip, which is as much accent as
+     a plate this size can take before it becomes the background again.
+
+     No offset shadow on purpose: every shadow in the system is a solid ink
+     block (_primitives.css §shadows), and an ink block behind an ink field is
+     not a shadow, it is a stepped edge. The card around it carries the
+     elevation. */
+  .at-balance {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 196px;
+    padding: var(--at-space-5);
+    /* Inverted block — fill and rim both at full strength, same law as
+       .at-btn--dark. */
+    border: var(--at-border-w) solid var(--at-ink-strong);
+    border-radius: var(--at-radius-lg);
+    background: var(--at-ink-strong);
+    color: var(--at-canvas);
+  }
+  .at-balance__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--at-space-3);
+    margin-block-end: var(--at-space-4);
+  }
+  .at-balance__brand {
+    font-family: var(--at-font-display);
+    font-size: var(--at-text-sm);
+    font-weight: var(--at-weight-semibold);
+    letter-spacing: 0.02em;
+  }
+  .at-balance__mark {
+    width: var(--at-icon-lg);
+    height: var(--at-icon-lg);
+    flex-shrink: 0;
+  }
+  /* EMV chip — a flat accent block with its contacts printed in ink. Hard
+     edges only; the detail is drawn, never shaded.
+
+     Three columns and two rows, so it lands on the six-pad grid a real chip
+     has. One line each way is not enough: a single crossbar over a single
+     upright is a plus sign, and at 34px the eye takes it for a button. The
+     second upright is thrown by a solid offset box-shadow rather than a third
+     pseudo-element, which is the same hard-edged block the shadow tokens are
+     built from. */
+  .at-balance__chip {
+    position: relative;
+    display: block;
+    width: 34px;
+    height: 24px;
+    border-radius: var(--at-radius-xs);
+    background: var(--at-accent);
+  }
+  .at-balance__chip::before,
+  .at-balance__chip::after {
+    content: '';
+    position: absolute;
+    background: var(--at-ink-strong);
+  }
+  .at-balance__chip::before {
+    inset-inline: 0;
+    inset-block-start: calc(50% - 1px);
+    height: 2px;
+  }
+  .at-balance__chip::after {
+    inset-block: 0;
+    inset-inline-start: 10px;
+    width: 2px;
+    box-shadow: 12px 0 0 var(--at-ink-strong);
+  }
+  /* Pushed to the foot of the plate so the chip and the number sit at opposite
+     ends of it, the way they do on the object being referenced. */
+  .at-balance__body {
+    margin-block-start: auto;
+    padding-block-start: var(--at-space-4);
+  }
+  .at-balance__label {
+    font-size: var(--at-text-2xs);
+    font-weight: var(--at-weight-2xs);
+    letter-spacing: var(--at-tracking-2xs);
+    text-transform: uppercase;
+    color: color-mix(in oklab, var(--at-canvas) 72%, transparent);
+  }
+  .at-balance__value {
+    font-family: var(--at-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--at-num-kpi);
+    line-height: var(--at-leading-kpi);
+    font-weight: var(--at-weight-kpi);
+    letter-spacing: var(--at-tracking-kpi);
+    margin-block: var(--at-space-1);
+  }
+  .at-balance__meta {
+    display: flex;
+    align-items: baseline;
+    gap: var(--at-space-2);
+    font-family: var(--at-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--at-text-sm);
+    font-weight: var(--at-weight-semibold);
+  }
+  .at-balance__meta span:last-child {
+    font-weight: var(--at-weight-xs);
+    color: color-mix(in oklab, var(--at-canvas) 70%, transparent);
+  }
+  .at-balance__number {
+    font-family: var(--at-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--at-text-sm);
+    letter-spacing: 0.14em;
+    color: color-mix(in oklab, var(--at-canvas) 78%, transparent);
+    margin-block-start: var(--at-space-3);
+  }
+
+  /* ══ §5 Badges — .at-badge ══ */
+  .at-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--at-space-1);
+    padding: var(--at-space-1) var(--at-space-2);
+    font-size: var(--at-text-2xs);
+    font-weight: var(--at-weight-2xs);
+    letter-spacing: var(--at-tracking-2xs);
+    text-transform: uppercase;
+    line-height: 1;
+    border: var(--at-border-w-sm) solid var(--at-ink);
+    border-radius: var(--at-radius-xs);
+    box-shadow: var(--at-shadow-2);
+    background: var(--at-surface);
+    /* Label on --at-surface: type, so full-strength ink. This also catches
+       --neutral and the bare badge, which declare no colour of their own. */
+    color: var(--at-ink-strong);
+    white-space: nowrap;
+  }
+  /* Every filled variant reads its own on-token. These used to be a mix of
+     inherited --at-ink and a literal #fff: in dark the inherited ink is
+     near-white while the fills are LIGHTENED, so lime/secondary/warning badges
+     rendered light-on-light and were effectively invisible. The on-* family
+     resolves per preset per mode — see _roles.css contract 2. */
+  .at-badge--accent {
+    background: var(--at-accent);
+    color: var(--at-on-accent);
+  }
+  .at-badge--secondary {
+    background: var(--at-secondary);
+    color: var(--at-on-secondary);
+  }
+  .at-badge--tertiary {
+    background: var(--at-tertiary);
+    color: var(--at-on-tertiary);
+  }
+  .at-badge--lime {
+    background: var(--at-lime);
+    color: var(--at-on-lime);
+  }
+  .at-badge--success {
+    background: var(--at-success);
+    color: var(--at-on-success);
+  }
+  .at-badge--warning {
+    background: var(--at-warning);
+    color: var(--at-on-warning);
+  }
+  .at-badge--danger {
+    background: var(--at-danger);
+    color: var(--at-on-danger);
+  }
+  .at-badge--info {
+    background: var(--at-info);
+    color: var(--at-on-info);
+  }
+  .at-badge--neutral {
+    background: var(--at-fill-active);
+  }
+  .at-badge--flat {
+    box-shadow: none;
+    background: var(--at-surface);
+    border-color: var(--at-border);
+  }
+  /* A badge sitting in running text — a tag mid-sentence, a chip in front of a
+     table cell's label, a count after a tab name — is separated from the words
+     around it by nothing but a word space: 3px at --at-text-sm. That is already
+     tight against a bordered box, and on the trailing side the 2px letterpress
+     shadow (--at-shadow-2 is `2px 2px 0`, drawn outside the layout box) eats
+     most of what is left, so the Sales transactions table rendered [STRIPE] and
+     "Order payment" 1px apart. The trailing margin carries the extra 2px that
+     the shadow takes back, so both sides read the same 7px.
+
+     This is a modifier and not the badge default on purpose. Nearly every other
+     badge in the template is a flex item inside .at-cluster, where the parent's
+     8px gap already does this job; giving .at-badge its own margin would widen
+     ~1000 of those gaps that are correct today. Reach for it whenever a badge is
+     a sibling of text rather than a sibling of other boxes. */
+  .at-badge--inline {
+    margin-inline-start: var(--at-space-1);
+    margin-inline-end: calc(var(--at-space-1) + 2px);
+  }
+  .at-badge .at-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--at-radius-pill);
+    background: currentColor;
+  }
+
+  /* ══ §6 Avatars — .at-avatar ══ */
+  .at-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--at-icon-xl);
+    height: var(--at-icon-xl);
+    border: var(--at-border-w) solid var(--at-ink);
+    border-radius: var(--at-radius-pill);
+    background: var(--at-accent);
+    color: var(--at-on-accent);
+    font-family: var(--at-font-display);
+    font-size: var(--at-text-sm);
+    font-weight: var(--at-weight-bold);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .at-avatar--xs {
+    width: var(--at-icon-sm);
+    height: var(--at-icon-sm);
+    font-size: var(--at-text-2xs);
+  }
+  .at-avatar--sm {
+    width: var(--at-icon-md);
+    height: var(--at-icon-md);
+    font-size: var(--at-text-xs);
+  }
+  .at-avatar--lg {
+    width: 40px;
+    height: 40px;
+    font-size: var(--at-text-md);
+  }
+  .at-avatar--xl {
+    width: 56px;
+    height: 56px;
+    font-size: var(--at-text-lg);
+  }
+  .at-avatar--square {
+    border-radius: var(--at-radius-xs);
+  }
+  .at-avatar-group {
+    display: inline-flex;
+  }
+  .at-avatar-group .at-avatar {
+    border-radius: var(--at-radius-pill);
+    margin-inline-end: -10px;
+    border: var(--at-border-w) solid var(--at-surface);
+  }
+  .at-avatar-group .at-avatar:hover {
+    z-index: 1;
+  }
+
+  /* ══ §7 Alerts — .at-alert ══ */
+  .at-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--at-space-3);
+    padding: var(--at-space-4);
+    border: var(--at-border-w) solid var(--at-ink);
+    border-radius: var(--at-radius-md);
+    box-shadow: var(--at-shadow-3);
+    background: var(--at-surface);
+  }
+  .at-alert--success {
+    background: var(--at-success-50);
+    border-inline-start-width: 6px;
+    border-inline-start-color: var(--at-success);
+  }
+  .at-alert--warning {
+    background: var(--at-warning-50);
+    border-inline-start-width: 6px;
+    border-inline-start-color: var(--at-warning);
+  }
+  .at-alert--danger {
+    background: var(--at-danger-50);
+    border-inline-start-width: 6px;
+    border-inline-start-color: var(--at-danger);
+  }
+  .at-alert--info {
+    background: var(--at-info-50);
+    border-inline-start-width: 6px;
+    border-inline-start-color: var(--at-info);
+  }
+  .at-alert__title {
+    font-weight: var(--at-weight-bold);
+    color: var(--at-text-strong);
+    margin-block-end: var(--at-space-1);
+  }
+  .at-alert__body {
+    font-size: var(--at-text-sm);
+    color: var(--at-text);
+  }
+
+  /* ══ §8 Toasts — .at-toast ══ */
+  .at-toast-region {
+    position: fixed;
+    inset-block-end: var(--at-space-5);
+    inset-inline-end: var(--at-space-5);
+    z-index: var(--at-z-toast);
+    display: flex;
+    flex-direction: column;
+    gap: var(--at-space-3);
+    max-width: 360px;
+  }
+  .at-toast {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--at-space-3);
+    padding: var(--at-space-4);
+    background: var(--at-surface);
+    border: var(--at-border-w) solid var(--at-ink);
+    border-radius: var(--at-radius-md);
+    box-shadow: var(--at-shadow-4);
+  }
+
+  /* ══ §9 Dropdowns — .at-dropdown ══
+     Dismissed by opacity + visibility, never by display:none. A panel toggled
+     with display has no rendered state to transition from, so every header menu
+     popped on and popped off. Dropdown.tsx mirrors `open` onto .is-open and the
+     fade lives here.
+     visibility keeps a closed menu's links out of the tab order the way display
+     did, and transitions with the fade instead of cutting it short.
+
+     position: fixed, not absolute. Floating UI positions these with the fixed
+     strategy and writes `position: fixed` + left/top back inline, so fixed is
+     what they run as anyway — but a closed panel is now in the layout from first
+     paint, and an absolute one with auto offsets parks at its static position
+     inside a 36px icon button, hanging off the end of the header and adding
+     document-wide horizontal overflow. Fixed elements contribute none. The 0/0
+     origin only ever shows for the frame before computePosition resolves. */
+  .at-dropdown {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: var(--at-z-dropdown);
+    min-width: 200px;
+    padding: var(--at-space-2);
+    background: var(--at-surface);
+    border: var(--at-border-w) solid var(--at-ink);
+    border-radius: var(--at-radius-sm);
+    box-shadow: var(--at-shadow-6);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    /* Toward the trigger it hangs from — one space step, the same gesture as
+       the rail flyout (nav.css) so every popover in the shell arrives alike. */
+    transform: translateY(calc(var(--at-space-1) * -1));
+    transition:
+      opacity var(--at-motion-fast) var(--at-ease-standard),
+      transform var(--at-motion-fast) var(--at-ease-standard),
+      visibility var(--at-motion-fast) var(--at-ease-standard);
+  }
+  .at-dropdown.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: none;
+  }
+  .at-dropdown__item {
+    display: flex;
+    align-items: center;
+    gap: var(--at-space-2);
+    padding: var(--at-space-2) var(--at-space-3);
+    border-radius: var(--at-radius-xs);
+    font-size: var(--at-text-sm);
+    color: var(--at-text);
+    width: 100%;
+    text-align: start;
+    cursor: pointer;
+    transition: background var(--at-motion-fast) var(--at-ease-standard);
+  }
+  .at-dropdown__item:hover {
+    background: var(--at-fill-hover);
+    color: var(--at-text);
+  }
+  .at-dropdown__item.is-active {
+    background: var(--at-fill-active);
+  }
+  .at-dropdown__divider {
+    height: 1px;
+    background: var(--at-border);
+    margin-block: var(--at-space-1);
+  }
+
+  /* ══ §9b Header dropdown contents — apps grid, cart, notifications ══
+     The shell panels (header.html) use .at-dropdown as the positioned frame
+     (handled by floating-ui + §9 above) and these content classes inside it.
+     They share the Bold-Press vocabulary: offset shadows, weighted-bottom
+     borders on tiles, terracotta accent washes. */
+
+  /* — Apps launcher grid — */
+  .at-apps-grid__title {
+    font-size: var(--at-text-2xs);
+    font-weight: var(--at-weight-bold);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--at-text-muted);
+    padding: var(--at-space-1) var(--at-space-2) var(--at-space-2);
+  }
+  .at-apps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--at-space-2);
+    padding: var(--at-space-1);
+  }
+  .at-apps-grid__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--at-space-2);
+    padding: var(--at-space-3) var(--at-space-2);
+    border-top-width: var(--at-border-w-top);
+    border-inline-width: var(--at-border-w-side);
+    border-bottom-width: var(--at-border-w-bottom);
+    border-style: solid;
+    border-color: var(--at-ink);
+    border-radius: var(--at-radius-sm);
+    box-shadow: var(--at-shadow-2);
+    background: var(--at-surface);
+    color: var(--at-text);
+    text-align: center;
+    font-size: var(--at-text-xs);
+    font-weight: var(--at-weight-semibold);
+    transition:
+      transform var(--at-motion-instant) var(--at-ease-emphasized),
+      box-shadow var(--at-motion-instant) var(--at-ease-emphasized);
+  }
+  .at-apps-grid__item:hover {
+    color: var(--at-ink-strong);
+    background: var(--at-fill-hover);
+    transform: translate(-1px, -1px);
+    box-shadow: var(--at-shadow-3);
+  }
+  .at-apps-grid__item svg {
+    width: 20px;
+    height: 20px;
+    /* An accent GLYPH, not an accent fill — the foreground half of the split. */
+    color: var(--at-accent-text);
+  }
+
+  /* — Cart panel — */
+  .at-cart {
+    min-width: 320px;
+    padding: 0;
+  }
+  .at-cart__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--at-space-3) var(--at-space-4);
+    border-bottom: var(--at-border-w-sm) solid var(--at-border);
+  }
+  .at-cart__title {
+    font-family: var(--at-font-display);
+    font-size: var(--at-text-sm);
+    font-weight: var(--at-weight-bold);
+    color: var(--at-text-strong);
+  }
+  .at-cart__count {
+    font-size: var(--at-text-xs);
+    color: var(--at-text-muted);
+  }
+  .at-cart__list {
+    display: flex;
+    flex-direction: column;
+    max-height: 280px;
+    overflow-y: auto;
+  }
+  .at-cart__item {
+    display: flex;
+    align-items: center;
+    gap: var(--at-space-3);
+    padding: var(--at-space-3) var(--at-space-4);
+    border-bottom: 1px solid var(--at-border);
+    text-decoration: none;
+    color: var(--at-text);
+    transition: background var(--at-motion-fast) var(--at-ease-standard);
+  }
+  .at-cart__item:last-child {
+    border-bottom: none;
+  }
+  .at-cart__item:hover {
+    background: var(--at-fill-hover);
+  }
+  .at-cart__thumb {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--at-radius-sm);
+    background: var(--at-accent-wash);
+    /* An accent icon ON the accent wash — 1.9:1 with the old accent and 1.5:1
+       once the fill lifts to L*72. --at-accent-text is built to clear 4.5:1 on
+       its own wash, which is exactly this case. */
+    color: var(--at-accent-text);
+  }
+  .at-cart__thumb svg {
+    width: 20px;
+    height: 20px;
+  }
+  .at-cart__body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  .at-cart__name {
+    font-size: var(--at-text-sm);
+    font-weight: var(--at-weight-semibold);
+    color: var(--at-text-strong);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .at-cart__meta {
+    font-size: var(--at-text-xs);
+    color: var(--at-text-muted);
+  }
+  .at-cart__price {
+    flex: 0 0 auto;
+    font-size: var(--at-text-sm);
+    font-weight: var(--at-weight-bold);
+    color: var(--at-text-strong);
+  }
+  .at-cart__foot {
+    display: flex;
+    flex-direction: column;
+    gap: var(--at-space-3);
+    padding: var(--at-space-3) var(--at-space-4) var(--at-space-4);
+    border-top: var(--at-border-w-sm) solid var(--at-border);
+  }
+  .at-cart__subtotal {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .at-cart__subtotal-label {
+    font-size: var(--at-text-sm);
+    color: var(--at-text-muted);
+  }
+  .at-cart__subtotal-value {
+    font-size: var(--at-text-md);
+    font-weight: var(--at-weight-bold);
+    color: var(--at-text-strong);
+  }
+  .at-cart__actions {
+    display: flex;
+    gap: var(--at-space-2);
+  }
+  .at-cart__actions .at-btn {
+    flex: 1 1 0;
+  }
+  /* count badge on the cart icon-button */
+  .at-cart__badge {
+    position: absolute;
+    inset-block-start: -6px;
+    inset-inline-end: -6px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--at-accent);
+    color: var(--at-on-accent);
+    font-size: var(--at-text-2xs);
+    font-weight: var(--at-weight-bold);
+    line-height: 1;
+    border: 1.5px solid var(--at-ink);
+    border-radius: var(--at-radius-pill);
+    z-index: 1;
+  }
+
+  /* — Notifications panel — */
+  .at-notif {
+    min-width: 340px;
+    padding: 0;
+  }
+  .at-notif__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--at-space-3) var(--at-space-4);
+    border-bottom: var(--at-border-w-sm) solid var(--at-border);
+  }
+  .at-notif__title {
+    font-family: var(--at-font-display);
+    font-size: var(--at-text-sm);
+    font-weight: var(--at-weight-bold);
+    color: var(--at-text-strong);
+  }
+  .at-notif__list {
+    display: flex;
+    flex-direction: column;
+    max-height: 360px;
+    overflow-y: auto;
+  }
+  .at-notif__item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--at-space-3);
+    padding: var(--at-space-3) var(--at-space-4);
+    border-bottom: 1px solid var(--at-border);
+    text-decoration: none;
+    color: var(--at-text);
+    transition: background var(--at-motion-fast) var(--at-ease-standard);
+  }
+  .at-notif__item:last-child {
+    border-bottom: none;
+  }
+  .at-notif__item:hover {
+    background: var(--at-fill-hover);
+  }
+  .at-notif__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--at-radius-sm);
+    background: var(--at-accent-wash);
+    color: var(--at-accent-text); /* icon on the wash — same as .at-cart__thumb */
+  }
+  .at-notif__icon svg {
+    width: 18px;
+    height: 18px;
+  }
+  .at-notif__body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  .at-notif__text {
+    font-size: var(--at-text-sm);
+    color: var(--at-text);
+    line-height: 1.4;
+  }
+  .at-notif__text strong {
+    color: var(--at-text-strong);
+    font-weight: var(--at-weight-bold);
+  }
+  .at-notif__time {
+    font-size: var(--at-text-2xs);
+    color: var(--at-text-muted);
+  }
+  .at-notif__footer {
+    display: block;
+    padding: var(--at-space-3) var(--at-space-4);
+    text-align: center;
+    font-size: var(--at-text-xs);
+    font-weight: var(--at-weight-semibold);
+    /* A link label on --at-surface, so both states take the foreground half.
+       --at-link-hover is the darkened foreground; --at-accent-hover is a FILL
+       step and would land ~2:1 here now that the fill sits at L*64. */
+    color: var(--at-accent-text);
+    text-decoration: none;
+    border-top: var(--at-border-w-sm) solid var(--at-border);
+  }
+  .at-notif__footer:hover {
+    background: var(--at-fill-hover);
+    color: var(--at-link-hover);
+  }
+
+  /* ══ §10 Modals — .at-modal ══ */
+  .at-modal {
+    position: fixed;
+    inset: 0;
+    z-index: var(--at-z-modal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--at-space-4);
+  }
+  .at-modal__dialog {
+    width: 100%;
+    max-width: 520px;
+    background: var(--at-surface);
+    border: var(--at-border-w) solid var(--at-ink);
+    border-radius: var(--at-radius-lg);
+    box-shadow: var(--at-shadow-6);
+  }
+  .at-modal__header,
+  .at-modal__body,
+  .at-modal__footer {
+    padding: var(--at-space-5);
+  }
+  .at-modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-block-end: var(--at-border-w-sm) solid var(--at-border);
+  }
+  .at-modal__title {
+    font-family: var(--at-font-display);
+    font-size: var(--at-text-lg);
+    font-weight: var(--at-weight-bold);
+    color: var(--at-text-strong);
+  }
+  .at-modal__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--at-space-2);
+    border-block-start: var(--at-border-w-sm) solid var(--at-border);
+  }
+  .at-modal--lg .at-modal__dialog {
+    max-width: 800px;
+  }
+
+  /* ══ §11 Offcanvas — .at-offcanvas ══ */
+  .at-offcanvas {
+    position: fixed;
+    z-index: var(--at-z-drawer);
+    width: 360px;
+    max-width: 90vw;
+    height: 100%;
+    background: var(--at-surface);
+    border: var(--at-border-w) solid var(--at-ink);
+    box-shadow: var(--at-shadow-6);
+    display: flex;
+    flex-direction: column;
+  }
+  .at-offcanvas--end {
+    inset-block: 0;
+    inset-inline-end: 0;
+  }
+  .at-offcanvas--start {
+    inset-block: 0;
+    inset-inline-start: 0;
+  }
+
+  /* ══ §12 Tabs — .at-tabs ══ */
+  .at-tabs__nav {
+    display: flex;
+    gap: var(--at-space-1);
+    border-block-end: var(--at-border-w) solid var(--at-ink);
+  }
+  .at-tabs__tab {
+    padding: var(--at-space-3) var(--at-space-4);
+    font-size: var(--at-text-sm);
+    font-weight: var(--at-weight-semibold);
+    color: var(--at-text-muted);
+    position: relative;
+    cursor: pointer;
+    transition:
+      color var(--at-motion-fast) var(--at-ease-standard),
+      background var(--at-motion-fast) var(--at-ease-standard);
+  }
+  /* An underline tab had no hover state at all — the only way to tell a tab
+     apart from the static heading beside it was to click it. Darkening the
+     label is the whole affordance; the tab must not move, because the active
+     underline is anchored to the nav's bottom rule. */
+  .at-tabs__tab:hover {
+    color: var(--at-text-strong);
+  }
+  .at-tabs__tab.is-active {
+    color: var(--at-text-strong);
+  }
+  .at-tabs__tab.is-active::after {
+    content: '';
+    position: absolute;
+    inset-block-end: -2px;
+    inset-inline: 0;
+    height: 3px;
+    background: var(--at-accent);
+  }
+  .at-tabs--pills .at-tabs__nav {
+    border: none;
+    gap: var(--at-space-2);
+  }
+  /* A pill tab is a bordered block on --at-shadow-2, so it reads as pressable
+     and gets the matching 2px press — same law as .at-pagination__btn. */
+  .at-tabs--pills .at-tabs__tab {
+    border: var(--at-border-w-sm) solid var(--at-ink);
+    border-radius: var(--at-radius-pill);
+    box-shadow: var(--at-shadow-2);
+    transition:
+      transform var(--at-motion-instant) var(--at-ease-emphasized),
+      box-shadow var(--at-motion-instant) var(--at-ease-emphasized),
+      color var(--at-motion-fast) var(--at-ease-standard),
+      background var(--at-motion-fast) var(--at-ease-standard);
+  }
+  .at-tabs--pills .at-tabs__tab:hover {
+    background: var(--at-fill-hover);
+  }
+  .at-tabs--pills .at-tabs__tab:active {
+    transform: translate(2px, 2px);
+    box-shadow: var(--at-shadow-press);
+  }
+  .at-tabs--pills .at-tabs__tab.is-active {
+    background: var(--at-accent);
+    color: var(--at-on-accent);
+  }
+  .at-tabs--pills .at-tabs__tab.is-active:hover {
+    background: var(--at-accent);
+  }
+  .at-tabs--pills .at-tabs__tab.is-active::after {
+    display: none;
+  }
+
+  /* ══ §13 Breadcrumb — .at-breadcrumb ══ */
+  .at-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: var(--at-space-2);
+    font-size: var(--at-text-xs);
+    color: var(--at-text-muted);
+    flex-wrap: wrap;
+  }
+  .at-breadcrumb__sep {
+    color: var(--at-text-subtle);
+  }
+  .at-breadcrumb__item:last-child {
+    color: var(--at-text-strong);
+    font-weight: var(--at-weight-semibold);
+  }
+
+  /* ══ §14 Pagination — .at-pagination ══ */
+  /* Wraps for the same reason .at-cluster does: a ten-page range plus prev/next
+     is wider than a 390px viewport, and an inline-flex row with no wrap pushed
+     the whole document sideways rather than folding onto a second line. */
+  .at-pagination {
+    display: inline-flex;
+    gap: var(--at-space-1);
+    flex-wrap: wrap;
+  }
+  .at-pagination__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--at-control-sm);
+    height: var(--at-control-sm);
+    padding-inline: var(--at-space-2);
+    /* Uniform with every other pressable control — this used to carry its own
+       scaled-down weighting (1.5 top/sides, 2 bottom) back when buttons had a
+       heavy lip. */
+    border-width: var(--at-border-w);
+    border-style: solid;
+    border-color: var(--at-ink);
+    border-radius: var(--at-radius-xs);
+    /* 2px block, so the print is thrown 2px the other way — the strike has to
+       match the impression it is bracketing, as on .at-icon-btn. */
+    --at-focus-print: -2px -2px 0;
+    box-shadow: var(--at-shadow-focus), var(--at-shadow-2);
+    background: var(--at-surface);
+    color: var(--at-ink-strong); /* the numeral is type — see .at-btn */
+    font-size: var(--at-text-sm);
+    font-weight: var(--at-weight-semibold);
+    cursor: pointer;
+    transition:
+      transform var(--at-motion-instant) var(--at-ease-emphasized),
+      box-shadow var(--at-motion-instant) var(--at-ease-emphasized),
+      background var(--at-motion-fast) var(--at-ease-standard);
+  }
+  /* Rests on --at-shadow-2, so the press travels the matching 2px and lands
+     flush on its own shadow — same law as .at-btn, one notch lower. These are
+     free-standing blocks (no clipping shell), so they get the real press
+     rather than the fill-only treatment the segment members take. */
+  .at-pagination__btn:hover {
+    background: var(--at-fill-hover);
+  }
+  .at-pagination__btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: var(--at-shadow-press);
+  }
+  .at-pagination__btn.is-active {
+    background: var(--at-accent);
+    color: var(--at-on-accent);
+  }
+  .at-pagination__btn.is-active:hover {
+    background: var(--at-accent);
+  }
+  /* Same uninked plate as .at-btn — see the note in §1. The prev/next arrows
+     at the ends of a pager are the most frequently disabled controls in the
+     template, so this is the one users actually see. */
+  .at-pagination__btn:disabled,
+  .at-pagination__btn[disabled] {
+    background: var(--at-surface-subtle);
+    color: var(--at-text-subtle);
+    border-color: var(--at-text-disabled);
+    box-shadow: var(--at-shadow-none);
+    pointer-events: none;
+    transform: none;
+    cursor: default;
+  }
+
+  /* ══ §15 Progress — .at-progress ══ */
+  .at-progress {
+    height: var(--at-space-3);
+    border: var(--at-border-w-sm) solid var(--at-ink);
+    border-radius: var(--at-radius-xs);
+    background: var(--at-surface-subtle);
+    overflow: hidden;
+  }
+  .at-progress__bar {
+    height: 100%;
+    background: var(--at-accent);
+    transition: width var(--at-motion-base) var(--at-ease-standard);
+  }
+  .at-progress--success .at-progress__bar {
+    background: var(--at-success);
+  }
+  .at-progress--danger .at-progress__bar {
+    background: var(--at-danger);
+  }
+  .at-progress--warning .at-progress__bar {
+    background: var(--at-warning);
+  }
+  .at-progress--info .at-progress__bar {
+    background: var(--at-info);
+  }
+
+  /* ══ §16 Spinners — .at-spinner ══
+     currentColor, not ink: a spinner almost always sits inside the control it
+     is reporting on, so it has to track that control's label. Pinned to ink it
+     was invisible on --primary and --dark, and pinned to --at-on-accent (as
+     the loading-state demo did inline) it went invisible the moment the button
+     was disabled and lost its accent fill. currentColor is correct in all
+     three without a per-variant rule. */
+  .at-spinner {
+    width: var(--at-icon-md);
+    height: var(--at-icon-md);
+    border: var(--at-border-w-sm) solid currentColor;
+    border-block-end-color: transparent;
+    border-radius: var(--at-radius-xs);
+    animation: at-spin 0.7s var(--at-ease-linear) infinite;
+  }
+  @keyframes at-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* ══ §17 Skeletons — .at-skeleton ══ */
+  .at-skeleton {
+    display: block;
+    background: var(--at-surface-subtle);
+    border: var(--at-border-w-sm) solid var(--at-border);
+    border-radius: var(--at-radius-xs);
+    animation: at-skel 1.6s var(--at-ease-standard) infinite;
+  }
+  @keyframes at-skel {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.55;
+    }
+  }
+
+  /* ══ §18 List group — .at-list ══ */
+  .at-list {
+    border: var(--at-border-w) solid var(--at-ink);
+    border-radius: var(--at-radius-md);
+    overflow: hidden;
+  }
+  .at-list__item {
+    padding: var(--at-space-3) var(--at-space-4);
+    border-block-end: var(--at-border-w-sm) solid var(--at-border);
+    background: var(--at-surface);
+  }
+  .at-list__item:last-child {
+    border-block-end: none;
+  }
+  .at-list__item.is-active {
+    background: var(--at-accent-wash);
+  }
+  /* The list carries an .is-active state, so its rows are selectable in
+     principle — but they answered the cursor with nothing, while the table
+     directly below on half these pages washes on hover. Same wash, same token,
+     so a row reads the same whether it was built as a list or as a table.
+
+     :not(.is-active) rather than a later override: the active row is already
+     washed in accent, and --at-fill-hover on top of it reads as the selection
+     being lost rather than as a hover. Pagination settles the same collision
+     the same way in §22.
+
+     (hover: hover) — a touch device latches :hover on tap and would leave a row
+     looking selected next to the one that actually is. */
+  @media (hover: hover) {
+    .at-list__item:not(.is-active):hover {
+      background: var(--at-fill-hover);
+    }
+  }
+
+  /* ══ §19 Timeline — .at-timeline ══ */
+  .at-timeline {
+    position: relative;
+    padding-inline-start: var(--at-space-6);
+  }
+  .at-timeline::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 7px;
+    width: 2px;
+    background: var(--at-ink);
+  }
+  .at-timeline__item {
+    position: relative;
+    padding-block-end: var(--at-space-5);
+  }
+  .at-timeline__dot {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: -23px;
+    width: 16px;
+    height: 16px;
+    background: var(--at-accent);
+    border: var(--at-border-w-sm) solid var(--at-ink);
+    border-radius: var(--at-radius-pill);
+  }
+
+  /* ══ §21 Ratings — .at-rating ══ */
+  .at-rating {
+    display: inline-flex;
+    gap: 2px;
+    color: var(--at-secondary-text);
+  }
+  .at-rating svg {
+    width: var(--at-icon-sm);
+    height: var(--at-icon-sm);
+    fill: currentColor;
+    stroke: var(--at-ink-strong); /* the star outline is a glyph, not an edge */
+    stroke-width: 1;
+  }
+  .at-rating__empty {
+    color: var(--at-text-disabled);
+    fill: transparent;
+  }
+
+  /* ══ §22 Accordion — .at-accordion ══ */
+  .at-accordion {
+    border: var(--at-border-w) solid var(--at-ink);
+    border-radius: var(--at-radius-md);
+    overflow: hidden;
+  }
+  .at-accordion__item + .at-accordion__item {
+    border-block-start: var(--at-border-w-sm) solid var(--at-border);
+  }
+  /* A disclosure control clipped by the item's overflow: hidden — fill only,
+     for the same reason the group/segment members take fill. */
+  .at-accordion__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: var(--at-space-4);
+    background: var(--at-surface);
+    color: var(--at-text-strong);
+    font-weight: var(--at-weight-semibold);
+    text-align: start;
+    cursor: pointer;
+    transition: background var(--at-motion-fast) var(--at-ease-standard);
+  }
+  .at-accordion__head:hover {
+    background: var(--at-fill-hover);
+  }
+  .at-accordion__head:active {
+    background: var(--at-fill-active);
+  }
+  .at-accordion__body {
+    padding: var(--at-space-4);
+    border-block-start: var(--at-border-w-sm) solid var(--at-border);
+    background: var(--at-surface-subtle);
+    color: var(--at-text);
+  }
+
+  /* ══ §25 Tables — .at-table ══ */
+  .at-table-wrap {
+    overflow-x: auto;
+    border: var(--at-border-w) solid var(--at-ink);
+    border-radius: var(--at-radius-md);
+  }
+  .at-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+  }
+  .at-table thead th {
+    padding: var(--at-space-3) var(--at-space-4);
+    background: var(--at-surface-subtle);
+    border-block-end: var(--at-border-w) solid var(--at-ink);
+    font-size: var(--at-text-2xs);
+    font-weight: var(--at-weight-2xs);
+    letter-spacing: var(--at-tracking-2xs);
+    text-transform: uppercase;
+    color: var(--at-text-muted);
+    text-align: start;
+    white-space: nowrap;
+  }
+  .at-table tbody td {
+    padding: var(--at-space-3) var(--at-space-4);
+    border-block-end: var(--at-border-w-sm) solid var(--at-border);
+    color: var(--at-text);
+    font-size: var(--at-text-sm);
+    vertical-align: middle;
+  }
+  .at-table tbody tr:last-child td {
+    border-block-end: none;
+  }
+  .at-table tbody tr:hover {
+    background: var(--at-fill-hover);
+  }
+  .at-table--dense thead th,
+  .at-table--dense tbody td {
+    padding: var(--at-space-2) var(--at-space-3);
+  }
+  .at-table .at-num {
+    text-align: end;
+  }
+
+  /* ══ §26 Forms — spec 10 ══ */
+  .at-form-label {
+    display: block;
+    font-size: var(--at-text-sm);
+    font-weight: var(--at-weight-semibold);
+    color: var(--at-text-strong);
+    margin-block-end: var(--at-space-2);
+  }
+  /* A hint is a sentence the buyer has to read to fill the field in — it is
+     a paragraph, not a label, so it sits at the 14px floor and not below it. */
+  .at-form-hint {
+    font-size: var(--at-text-sm);
+    color: var(--at-text-muted);
+    margin-block-start: var(--at-space-1);
+  }
+  .at-input,
+  .at-select,
+  .at-textarea {
+    display: block;
+    width: 100%;
+    height: var(--at-control-md);
+    padding-inline: var(--at-space-3);
+    font-family: var(--at-font-sans);
+    font-size: var(--at-text-sm);
+    color: var(--at-text);
+    background: var(--at-surface);
+    border: var(--at-border-w) solid var(--at-ink);
+    border-radius: var(--at-radius-sm);
+    /* --at-shadow-focus leads the list for the same reason it does on .at-btn
+       above: box-shadow is one property and the cascade cannot append to it, so
+       the counter-print has to ride in a layer the field already carries and
+       :focus-visible only swaps its value (tokens/_recipes.css). A field is a
+       bordered block on an offset block — the same impression a button makes —
+       so it takes the same mark. */
+    box-shadow: var(--at-shadow-focus), var(--at-shadow-2);
+  }
+  .at-textarea {
+    height: auto;
+    min-height: 96px;
+    padding-block: var(--at-space-2);
+    resize: vertical;
+  }
+  .at-input::placeholder,
+  .at-textarea::placeholder {
+    color: var(--at-text-subtle);
+  }
+  .at-input:disabled,
+  .at-select:disabled,
+  .at-textarea:disabled {
+    color: var(--at-text-disabled);
+    background: var(--at-surface-subtle);
+    box-shadow: none;
+  }
+  .at-input.is-error,
+  .at-select.is-error,
+  .at-textarea.is-error {
+    border-color: var(--at-danger);
+  }
+  .at-form-error {
+    font-size: var(--at-text-xs);
+    color: var(--at-danger-text);
+    font-weight: var(--at-weight-semibold);
+    margin-block-start: var(--at-space-1);
+  }
+  /* input-group: joined prefix/suffix addons + a single field.
+     Uses flex so the field takes the remaining width (flex:1) while
+     addons size to their content — unlike .at-row's 12-col grid, which
+     would squeeze each child into a fixed track. */
+  .at-input-group {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    /* The group is what gets printed on, not the field inside it — see the
+       focus rule in tokens/_recipes.css. The radius is here so the print's
+       corners register with the addons' rounded ones; the group paints no
+       background or border of its own, so it changes nothing at rest. */
+    border-radius: var(--at-radius-sm);
+    box-shadow: var(--at-shadow-focus);
+  }
+  .at-input-group > .at-input,
+  .at-input-group > .at-select {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .at-input-group__addon {
+    display: inline-flex;
+    align-items: center;
+    padding-inline: var(--at-space-3);
+    font-family: var(--at-font-sans);
+    font-size: var(--at-text-sm);
+    color: var(--at-text-muted);
+    background: var(--at-surface-subtle);
+    border: var(--at-border-w) solid var(--at-ink);
+    white-space: nowrap;
+  }
+  .at-input-group__addon--prefix {
+    border-right: 0;
+    border-radius: var(--at-radius-sm) 0 0 var(--at-radius-sm);
+  }
+  .at-input-group__addon--suffix {
+    border-left: 0;
+    border-radius: 0 var(--at-radius-sm) var(--at-radius-sm) 0;
+  }
+  /* The field inside a group drops its own border-radius on the joined
+     side(s) so the corners don't poke out from behind the addon. */
+  .at-input-group:has(.at-input-group__addon--prefix) > .at-input,
+  .at-input-group:has(.at-input-group__addon--prefix) > .at-select {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+  .at-input-group:has(.at-input-group__addon--suffix) > .at-input,
+  .at-input-group:has(.at-input-group__addon--suffix) > .at-select {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  /* checkbox/radio */
+  .at-check {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--at-space-2);
+    font-size: var(--at-text-sm);
+    cursor: pointer;
+  }
+  .at-check input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--at-accent);
+    border: var(--at-border-w-sm) solid var(--at-ink);
+  }
+  /* switch */
+  .at-switch {
+    position: relative;
+    display: inline-block;
+    width: 42px;
+    height: 24px;
+    border: var(--at-border-w-sm) solid var(--at-ink);
+    border-radius: var(--at-radius-pill);
+    background: var(--at-surface-subtle);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background var(--at-motion-fast) var(--at-ease-standard);
+  }
+  .at-switch__thumb {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 3px;
+    width: 16px;
+    height: 16px;
+    background: var(--at-surface);
+    border-radius: var(--at-radius-pill);
+    transform: translateY(-50%);
+    transition: transform var(--at-motion-fast) var(--at-ease-standard);
+  }
+  .at-switch.is-on {
+    background: var(--at-accent);
+  }
+  .at-switch.is-on .at-switch__thumb {
+    transform: translate(17px, -50%);
+  }
+  [dir='rtl'] .at-switch.is-on .at-switch__thumb {
+    transform: translate(-17px, -50%);
+  }
+
+  /* ══ §28 Chart wrapper — .at-chart ══ */
+  .at-chart {
+    padding: var(--at-space-5);
+  }
+  /* A chart card is a grid item, so .at-row stretches it to the height of the
+     tallest card in its row — but the chart inside was a fixed pixel box, so
+     everything below the plot was dead paper. It is not a rounding error: on
+     crypto/exchange.html a 320px price chart sits in a card the order book has
+     stretched to 868px, leaving 548px of white, and 24 of the 64 charts in the
+     template were short of their own card.
+
+     So: any card holding a chart body becomes a column, and the body takes
+     whatever the head — and the card's other content — leaves over. Charts in
+     cards that are NOT being stretched measure the same number they declared
+     and are unaffected. `:has(> ...)` rather than `.at-chart` on purpose: two
+     charts on landing.html sit in a plain .at-card, and they have the same
+     problem. The one chart body that is NOT a card's own child — the donut on
+     lms.html, which shares a nested row with a stats column and is deliberately
+     centred at 180px — is correctly left alone by the child combinator. */
+  .at-card:has(> .at-chart__body) {
+    display: flex;
+    flex-direction: column;
+  }
+  .at-card > .at-chart__body {
+    flex: 1 1 auto;
+    position: relative;
+    /* The canvas is taken out of flow below, so this box has no content height
+       of its own — this floor is what gives a chart its natural size when the
+       card is not being stretched. charts.js writes --at-chart-min-h from
+       data-at-chart-height.
+
+       !important because ApexCharts writes its own min-height inline on every
+       render, equal to the height it just drew. Letting that win is a ratchet:
+       a chart that has once been tall could never get shorter again, so
+       narrowing the viewport would leave the chart overflowing its own card. */
+    min-height: var(--at-chart-min-h, 260px) !important;
+  }
+  /* charts.js creates this element and mounts ApexCharts into it, so that the
+     library's `height: '100%'` — which measures the mount's PARENT — resolves
+     against the flex-sized body above. Out of flow so the drawn chart can never
+     feed its own height back into the sizing that decided how much room it had:
+     the box measures the space, then the chart fills it. */
+  .at-card > .at-chart__body > .at-chart__canvas {
+    position: absolute;
+    inset: 0;
+  }
+  .at-chart__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-block-end: var(--at-space-4);
+    gap: var(--at-space-3);
+    flex-wrap: wrap;
+  }
+  .at-chart__title {
+    font-family: var(--at-font-display);
+    font-size: var(--at-text-lg);
+    font-weight: var(--at-weight-bold);
+    color: var(--at-text-strong);
+  }
+  /* A card title and its support line were butted together with 0px between
+     the boxes, so a 20px headline and a 12px eyebrow read as one clot of text.
+     The page head already puts --at-space-1 under its title; this gives the
+     card head the same minimal step so the pairing reads the same everywhere.
+     Deliberately NOT `.at-chart__title + *`: most card heads are flex rows
+     whose next sibling is a button, badge or segmented control, and those must
+     not pick up a top margin. Only text-level support lines are listed. */
+  .at-chart__title + .at-eyebrow,
+  .at-chart__title + p,
+  .at-chart__title + .at-text-muted {
+    margin-block-start: var(--at-space-1);
+  }
+  .at-chart__body {
+    /* Same token as the filling rule above, so a chart body that is not a
+       card's own child still reserves exactly its declared height. */
+    min-height: var(--at-chart-min-h, 260px);
+    min-width: 0;
+    overflow: hidden;
+  }
+  /* ApexCharts injects an absolutely-positioned canvas sized to the container;
+     constrain it so it never forces the card wider than its grid track. */
+  .at-chart__body .apexcharts-canvas {
+    max-width: 100%;
+  }
+  .at-chart__legend {
+    display: flex;
+    gap: var(--at-space-3);
+    flex-wrap: wrap;
+    font-size: var(--at-text-xs);
+    color: var(--at-text-muted);
+    margin-block-start: var(--at-space-3);
+  }
+  .at-chart__legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--at-space-1);
+  }
+  .at-chart__legend-dot {
+    width: 10px;
+    height: 10px;
+    border: var(--at-border-w-sm) solid var(--at-ink);
+    border-radius: var(--at-radius-xs);
+  }
+
+  /* ── ApexCharts chrome ──
+     The hover layer is part of the chart, not a browser default: Apex ships a
+     white tooltip with a soft blur that reads as a foreign object on a Bold
+     Press surface. Re-dress it as a small ink-bordered card in both themes. */
+  .apexcharts-tooltip.apexcharts-theme-light,
+  .apexcharts-tooltip.apexcharts-theme-dark {
+    background: var(--at-chart-tooltip-bg);
+    color: var(--at-chart-tooltip-text);
+    border: var(--at-border-w-sm) solid var(--at-ink);
+    border-radius: var(--at-radius-sm);
+    box-shadow: var(--at-shadow-2);
+    font-family: var(--at-font-sans);
+    overflow: hidden;
+  }
+  .apexcharts-tooltip-title {
+    background: var(--at-surface-subtle);
+    border-block-end: var(--at-border-w-sm) solid var(--at-ink);
+    color: var(--at-text-muted);
+    font-family: var(--at-font-sans);
+    font-size: var(--at-text-2xs);
+    font-weight: var(--at-weight-semibold);
+    letter-spacing: var(--at-tracking-2xs);
+    text-transform: uppercase;
+    margin: 0;
+    padding: 6px 10px;
+  }
+  .apexcharts-tooltip-series-group {
+    padding: 2px 10px;
+  }
+  .apexcharts-tooltip-series-group.apexcharts-active {
+    padding-block: 4px;
+  }
+  .apexcharts-tooltip-text-y-label {
+    color: var(--at-text-muted);
+  }
+  /* Values are the one thing worth reading twice — mono, so digits align
+     between rows of a multi-series tooltip. */
+  .apexcharts-tooltip-text-y-value {
+    color: var(--at-text-strong);
+    font-family: var(--at-font-mono);
+    font-weight: var(--at-weight-semibold);
+  }
+  .apexcharts-tooltip-marker {
+    width: 8px;
+    height: 8px;
+    margin-inline-end: 7px;
+  }
+  .apexcharts-xaxistooltip,
+  .apexcharts-yaxistooltip {
+    background: var(--at-surface-overlay);
+    border: var(--at-border-w-sm) solid var(--at-ink);
+    border-radius: var(--at-radius-xs);
+    color: var(--at-text-strong);
+    font-family: var(--at-font-mono);
+    font-size: var(--at-text-2xs);
+  }
+  .apexcharts-xaxistooltip::before,
+  .apexcharts-xaxistooltip::after,
+  .apexcharts-yaxistooltip::before,
+  .apexcharts-yaxistooltip::after {
+    display: none;
+  }
+  .apexcharts-legend {
+    gap: 0;
+    padding: 0;
+  }
+  .apexcharts-legend-text {
+    font-family: var(--at-font-sans) !important;
+    color: var(--at-text-muted) !important;
+  }
+  /* Donut legends carry their slice value; the value is data, the label is not,
+     so only the value gets the mono/strong treatment. */
+  .at-chart-legend-val {
+    color: var(--at-text-strong);
+    font-family: var(--at-font-mono);
+    font-weight: var(--at-weight-semibold);
+  }
+  .apexcharts-legend-series {
+    align-items: center !important;
+    display: inline-flex !important;
+  }
+
+  /* Hover emphasis. Apex's own hover filter is disabled in plugins/charts.js
+     because it rewrites the series colour; the mark under the cursor keeps its
+     exact hue here and its neighbours step back instead. :has() scopes this to
+     a mark actually being hovered, so sweeping the gaps between bars does
+     nothing. */
+  .apexcharts-canvas:has(.apexcharts-pie-area:hover) .apexcharts-pie-area,
+  .apexcharts-canvas:has(.apexcharts-bar-area:hover) .apexcharts-bar-area {
+    opacity: 0.4;
+  }
+  .apexcharts-pie-area,
+  .apexcharts-bar-area {
+    transition: opacity var(--at-motion-fast) var(--at-ease-standard);
+  }
+  .apexcharts-canvas:has(.apexcharts-pie-area:hover) .apexcharts-pie-area:hover,
+  .apexcharts-canvas:has(.apexcharts-bar-area:hover) .apexcharts-bar-area:hover {
+    opacity: 1;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .apexcharts-pie-area,
+    .apexcharts-bar-area {
+      transition: none;
+    }
+  }
+} /* end @layer components */

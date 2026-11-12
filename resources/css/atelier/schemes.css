@@ -1,0 +1,48 @@
+/* ════════════════════════════════════════════════════════════════════════
+   schemes.css — chrome-only surface schemes — spec 01 §3.5, 03 §13
+   Header fill schemes, INDEPENDENT of content cards. Chrome schemes never
+   leak into the content area. The sidebar always follows the theme (its
+   --at-sidebar-bg/--at-sidebar-text fall through to the theme surface/text in
+   base.css), so only the header exposes a scheme override. Each scheme only
+   redeclares the --at-header-* custom properties that .at-header paints from.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* default: light chrome (white surface) — implicit; no overrides needed */
+
+/* dark chrome */
+[data-at-header='dark'] {
+  --at-header-bg: var(--at-canvas);
+  --at-header-text: var(--at-text);
+}
+
+/* brand chrome — solid accent fill */
+[data-at-header='brand'] {
+  --at-header-bg: var(--at-accent);
+  --at-header-text: var(--at-on-accent);
+}
+
+/* solid chrome — solid ink fill.
+   --at-ink-strong, not --at-ink: this scheme is *defined* as a solid ink bar
+   with canvas type on it, and at impression weight it would turn into a
+   mid-grey slab in dark mode. */
+[data-at-header='solid'] {
+  --at-header-bg: var(--at-ink-strong);
+  --at-header-text: var(--at-canvas);
+}
+
+/* texturechrome — subtle stipple/grid on light surface */
+[data-at-header='texture'] {
+  --at-header-bg: var(--at-surface);
+  --at-header-text: var(--at-text);
+  background-image: var(--at-header-texture, none);
+  background-size: 16px 16px;
+}
+
+/* default textures (subtle ink-hued dots) */
+[data-at-header-image='dots'] {
+  --at-header-texture: radial-gradient(var(--at-border) 1px, transparent 1px);
+}
+[data-at-header-image='grid'] {
+  --at-header-texture: linear-gradient(var(--at-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--at-border) 1px, transparent 1px);
+}

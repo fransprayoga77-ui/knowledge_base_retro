@@ -1,0 +1,982 @@
+/* ════════════════════════════════════════════════════════════════════════
+   shell.css — header/topbar, theme customizer, command palette — spec 03 §4, 04
+   The shell chrome components (header slot anatomy, customizer drawer, ⌘K).
+   Wrapped in @layer components (alongside components.css) so its rules sit at
+   the same cascade level as the rest of the component library — neither
+   beating nor beaten by .at-btn etc.
+   ════════════════════════════════════════════════════════════════════════ */
+@layer components {
+
+/* Sidebar toggle — doubles as desktop collapse + mobile hamburger.
+   toggleSidebar() (core/sidebar.js) picks drawer-vs-collapse by viewport. */
+.at-menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--at-control-sm);
+  height: var(--at-control-sm);
+  border-top-width: var(--at-border-w-top);
+  border-inline-width: var(--at-border-w-side);
+  border-bottom-width: var(--at-border-w-bottom);
+  border-style: solid;
+  border-color: var(--at-ink);
+  border-radius: var(--at-radius-sm);
+  /* 2px block, 2px strike — matches the .at-icon-btn row it sits beside. */
+  --at-focus-print: -2px -2px 0;
+  box-shadow: var(--at-shadow-focus), var(--at-shadow-2);
+  background: var(--at-surface);
+  color: var(--at-ink-strong); /* the glyph is type — see .at-btn in components.css */
+  cursor: pointer;
+  flex-shrink: 0;
+  /* It carries the same 2px-shadow geometry as the .at-icon-btn row it sits
+     beside in the header, so it has to travel on the same --at-motion-instant
+     clock — without this the hamburger snapped while its neighbors eased.
+     (Named, not numbered: that tier has since been retimed once already.) */
+  transition:
+    transform var(--at-motion-instant) var(--at-ease-emphasized),
+    box-shadow var(--at-motion-instant) var(--at-ease-emphasized),
+    background var(--at-motion-fast) var(--at-ease-standard);
+}
+/* It rests on the same 2px block as the .at-icon-btn row, so it takes the same
+   1px lift onto a 3px shadow — outer edge pinned, per components.css §1. Without
+   this it would be the one icon-shaped control in the header that stayed flat
+   under the cursor while its six neighbors and the user pill all answered.
+
+   The travel is a transform rather than the top/left the icon buttons use: that
+   detour exists only to avoid becoming a containing block for a position:fixed
+   dropdown panel, and this toggle hosts no panel. The fill wash it already had
+   stays — it is the only one of these controls that carries both, and the wash
+   is what survives on touch once the lift is guarded away.
+
+   (hover: hover) — a tap would otherwise latch the lift and leave the hamburger
+   sitting 1px proud of the row it is supposed to match. */
+@media (hover: hover) {
+  .at-menu-toggle:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: var(--at-shadow-focus), var(--at-shadow-3);
+  }
+}
+.at-menu-toggle:hover {
+  background: var(--at-fill-hover);
+}
+.at-menu-toggle:active {
+  transform: translate(2px, 2px);
+  box-shadow: var(--at-shadow-press);
+}
+@media (prefers-reduced-motion: reduce) {
+  .at-menu-toggle:hover,
+  .at-menu-toggle:active {
+    transform: none;
+  }
+}
+.at-menu-toggle svg {
+  width: var(--at-icon-md);
+  height: var(--at-icon-md);
+}
+
+/* In Compact / Expand the sidebar is locked to one geometry (icon rail or full),
+   so there is no desktop collapse to toggle — hide the hamburger. It stays visible
+   on mobile (≤992px), where it is the drawer trigger. */
+@media (min-width: 993px) {
+  [data-at-sidebar-style='compact'] .at-menu-toggle,
+  [data-at-sidebar-style='expand'] .at-menu-toggle {
+    display: none;
+  }
+}
+
+/* Search trigger — input-shaped button, spec 03 §4.2.
+   Weighted-bottom border like the other pressable controls. */
+.at-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--at-space-2);
+  flex: 0 1 240px;
+  min-width: 0;
+  height: var(--at-control-sm);
+  padding-inline: var(--at-space-3) 4px;
+  border-top-width: var(--at-border-w-top);
+  border-inline-width: var(--at-border-w-side);
+  border-bottom-width: var(--at-border-w-bottom);
+  border-style: solid;
+  border-color: var(--at-ink);
+  border-radius: var(--at-radius-sm);
+  /* Carries the counter-print layer like every other impression — see the note
+     on .at-input in components.css §26. */
+  box-shadow: var(--at-shadow-focus), var(--at-shadow-2);
+  background: var(--at-surface);
+  color: var(--at-text-muted);
+  font-size: var(--at-text-sm);
+}
+/* The header's ⌘K trigger holds completely still — no hover lift, no press.
+   It is shaped like a text field, and a field that moves under the pointer
+   reads as "typing starts here", which is wrong: the click opens a dialog
+   rather than placing a caret. The cursor and the ⌘K chip carry the
+   affordance; the palette opening is the feedback.
+
+   The [role='button'] hook is kept because the same class dresses the filter
+   fields on the table/listing pages, which wrap a live input — this rule must
+   never reach them. */
+.at-search[role='button'] {
+  cursor: pointer;
+}
+.at-search svg {
+  width: var(--at-icon-sm);
+  height: var(--at-icon-sm);
+  flex-shrink: 0;
+}
+/* A live input[type="search"] nested inside .at-search (e.g. the icons and
+   data-tables pages) must drop its native decoration — WebKit/Blink paint a
+   cancel button and a second border outline that read as a stray "]" beside
+   the field. Neutralise the UA chrome and let the input fill the container. */
+.at-search input[type='search'] {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  border: none;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  font-size: inherit;
+  color: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+}
+.at-search input[type='search']::-webkit-search-cancel-button,
+.at-search input[type='search']::-webkit-search-decoration {
+  appearance: none;
+  -webkit-appearance: none;
+}
+.at-search__placeholder {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.at-search__kbd {
+  margin-inline-start: auto;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  line-height: 1;
+  padding: 4px 6px;
+  font-family: var(--at-font-mono);
+  font-size: var(--at-text-2xs);
+  border: var(--at-border-w-sm) solid var(--at-border);
+  border-radius: var(--at-radius-xs);
+  background: var(--at-surface-subtle);
+  color: var(--at-text-muted);
+  white-space: nowrap;
+}
+
+/* Header right cluster */
+.at-header__right {
+  display: flex;
+  align-items: center;
+  gap: var(--at-space-2);
+  margin-inline-start: auto;
+}
+.at-header__divider {
+  width: 1px;
+  height: 24px;
+  background: var(--at-border);
+  margin-inline: var(--at-space-1);
+}
+
+/* Header user — a dropdown trigger like the icon buttons beside it, so it
+   presses on the same curve. position: relative is what the offsets ride on;
+   it does not become a containing block for the fixed .at-dropdown panel. */
+.at-header__user {
+  display: flex;
+  align-items: center;
+  gap: var(--at-space-2);
+  max-width: 100%;
+  min-width: 0;
+  height: var(--at-control-sm);
+  padding-block: 0;
+  padding-inline: var(--at-space-2);
+  /* Same raised edge as .at-icon-btn — uniform 2px. The fixed height keeps the
+     pill, the bell and the gear at the same 32px regardless of border weight,
+     so this rim can be retuned from the token without a layout shift. */
+  border-top-width: var(--at-border-w-top);
+  border-inline-width: var(--at-border-w-side);
+  border-bottom-width: var(--at-border-w-bottom);
+  border-style: solid;
+  border-color: var(--at-ink);
+  border-radius: var(--at-radius-sm);
+  box-shadow: var(--at-shadow-2);
+  background: var(--at-surface);
+  position: relative;
+  /* Resting values for the offsets the hover and press ride on. Undeclared
+     they compute to `auto`, which cannot interpolate — see the same note on
+     .at-icon-btn in components.css. */
+  top: 0;
+  left: 0;
+  cursor: pointer;
+  /* Geometry on the instant clock, fill on the slower colour one — the split
+     every control in this row runs. See .at-icon-btn in components.css §1. */
+  transition:
+    top var(--at-motion-instant) var(--at-ease-emphasized),
+    left var(--at-motion-instant) var(--at-ease-emphasized),
+    box-shadow var(--at-motion-instant) var(--at-ease-emphasized),
+    background var(--at-motion-fast) var(--at-ease-standard);
+}
+/* Strictly this pill is not an icon button, but it is the last cell of the
+   same header row: same 32px box, same 2px rim, same --at-surface fill, same
+   dropdown trigger. Once the icon buttons and the hamburger took the wash, a
+   pill that only moved would have been the one control in the row answering
+   with half the vocabulary of its neighbors. */
+.at-header__user:hover {
+  top: -1px;
+  left: -1px;
+  box-shadow: var(--at-shadow-3);
+  background: var(--at-fill-hover);
+}
+.at-header__user:active {
+  top: 2px;
+  left: 2px;
+  box-shadow: var(--at-shadow-press);
+}
+/* Held in place while its panel is open — same reason as .at-icon-btn: the
+   panel is a descendant and floating-ui follows the reference, so any travel
+   here drags the open menu. Hover gives up its lift outright (a 1px nudge
+   under an open menu is noise, not feedback), but the press still reads —
+   the shadow flattens where it can no longer sink. Both selectors are (0,3,0)
+   so the press below wins the tie on source order, as it must: pressing
+   implies hovering. */
+.at-header__user[aria-expanded='true']:hover {
+  top: 0;
+  left: 0;
+  box-shadow: var(--at-shadow-2);
+}
+.at-header__user[aria-expanded='true']:active {
+  top: 0;
+  left: 0;
+  box-shadow: var(--at-shadow-press);
+}
+/* A press inside the panel propagates :active up to this host — clicking a
+   menu item must not flash the trigger. Pressing the trigger itself never
+   matches, so the closing click keeps its feedback. */
+.at-header__user[aria-expanded='true']:active:has(.at-dropdown:active) {
+  box-shadow: var(--at-shadow-2);
+}
+@media (prefers-reduced-motion: reduce) {
+  .at-header__user:hover,
+  .at-header__user:active {
+    top: 0;
+    left: 0;
+  }
+}
+.at-header__user-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--at-text-sm);
+  font-weight: var(--at-weight-semibold);
+  color: var(--at-text-strong);
+}
+@media (max-width: 768px) {
+  /* The fullscreen app pages (chat, file-manager) put two text buttons in the
+     appbar. That bar cannot wrap — it is a fixed-height strip in an
+     overflow:hidden body, so a second line is clipped, not shown — and at
+     390px the pair does not fit beside the wordmark. Drop the secondary
+     action and keep the primary one plus the theme toggle. This has to sit in
+     the components layer to outrank .at-btn's own display. */
+  .at-appbar .at-btn--outline {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .at-header__user-name {
+    display: none;
+  }
+  /* The header right cluster carries ~8 icon buttons + the search bar; on a
+     390px phone that overflows. Collapse the search bar to an icon button and
+     drop the least-essential chrome (language, fullscreen, apps, cart) — keep
+     theme, notifications, profile and customizer. Buttons are tagged with
+     data-at-header-slot so the rule is stable against re-ordering. */
+  .at-search {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--at-control-sm);
+    height: var(--at-control-sm);
+    padding: 0;
+    gap: 0;
+    border-top-width: var(--at-border-w-top);
+    border-inline-width: var(--at-border-w-side);
+    border-bottom-width: var(--at-border-w-bottom);
+    border-style: solid;
+    border-color: var(--at-ink);
+    border-radius: var(--at-radius-sm);
+    /* Restates the focus layer with the shadow, or the collapsed search loses
+       its counter-print at phone widths — box-shadow is one property, so any
+       rule that re-declares it has to carry the layer too. */
+    box-shadow: var(--at-shadow-focus), var(--at-shadow-2);
+    background: var(--at-surface);
+    color: var(--at-ink-strong); /* collapsed to an icon button — the glyph is type */
+  }
+  .at-search > span {
+    display: none;
+  }
+  .at-header__right [data-at-header-slot='language'],
+  .at-header__right [data-at-header-slot='fullscreen'],
+  .at-header__right [data-at-header-slot='apps'],
+  .at-header__right [data-at-header-slot='cart'],
+  .at-header__divider {
+    display: none;
+  }
+}
+
+/* Notification dot */
+.at-icon-btn .at-dot {
+  position: absolute;
+  inset-block-start: 4px;
+  inset-inline-end: 4px;
+  width: 8px;
+  height: 8px;
+  background: var(--at-accent);
+  border: 1px solid var(--at-ink);
+  border-radius: var(--at-radius-pill);
+}
+
+/* ══ Customizer offcanvas — spec 04 §4 ══
+   Hidden by transform + visibility, never by `display`. The panel used to carry
+   x-show, and that is what stopped it from ever sliding: x-show writes
+   display:none, so on open the element goes from unrendered to rendered in the
+   same style recalc as the transform change — no before-change style to
+   interpolate from, so it snaps into place — and on close it stops rendering
+   before the slide-out gets a frame. Same failure as the drawer backdrop
+   (base.css §12); the markup carries the state as .is-open instead.
+
+   `visibility` covers what display was actually needed for. Off-canvas alone
+   leaves the panel's controls in the tab order, reachable by keyboard while
+   invisible; visibility:hidden takes them out of it. Unlike display it is
+   transitionable — listed below, it holds `visible` for the whole exit so the
+   panel is still painted while it slides away, then flips on the last frame.
+
+   The dark scrim behind it is the shared .at-backdrop element, raised by
+   body.at-customizer-open (base.css §12). Same --at-motion-slow tier as the
+   sidebar drawer: this is the same gesture in mirror image, so panel and scrim
+   land on one frame. */
+.at-customizer {
+  position: fixed;
+  inset-block: 0;
+  inset-inline-end: 0;
+  z-index: var(--at-z-customizer);
+  width: 340px;
+  max-width: 90vw;
+  background: var(--at-surface);
+  border-inline-start: var(--at-border-w) solid var(--at-ink);
+  box-shadow: var(--at-shadow-6);
+  transform: translateX(100%);
+  visibility: hidden;
+  transition:
+    transform var(--at-motion-slow) var(--at-ease-standard),
+    visibility var(--at-motion-slow) var(--at-ease-standard);
+  display: flex;
+  flex-direction: column;
+}
+[dir='rtl'] .at-customizer {
+  transform: translateX(-100%);
+}
+.at-customizer.is-open {
+  transform: translateX(0);
+  visibility: visible;
+}
+.at-customizer__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--at-space-4) var(--at-space-5);
+  border-block-end: var(--at-border-w) solid var(--at-border);
+}
+.at-customizer__title {
+  font-family: var(--at-font-display);
+  font-size: var(--at-text-lg);
+  font-weight: var(--at-weight-bold);
+  color: var(--at-text-strong);
+}
+.at-customizer__body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: var(--at-space-5);
+}
+.at-customizer__section {
+  margin-block-end: var(--at-space-6);
+}
+.at-customizer__label {
+  display: block;
+  font-size: var(--at-text-2xs);
+  font-weight: var(--at-weight-2xs);
+  letter-spacing: var(--at-tracking-2xs);
+  text-transform: uppercase;
+  color: var(--at-text-muted);
+  margin-block-end: var(--at-space-3);
+}
+
+/* Colour scheme swatch grid */
+.at-preset-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--at-space-3);
+}
+.at-preset {
+  position: relative;
+  cursor: pointer;
+  border: var(--at-border-w) solid var(--at-ink);
+  border-radius: var(--at-radius-sm);
+  box-shadow: var(--at-shadow-2);
+  overflow: hidden;
+  aspect-ratio: 1;
+}
+.at-preset__canvas {
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.at-preset__bar {
+  height: 6px;
+  border-radius: 1px;
+}
+.at-preset__name {
+  position: absolute;
+  inset-block-end: 4px;
+  inset-inline-start: 4px;
+  /* Was a hardcoded 9px — the smallest type in the template and three steps
+     under the 12px floor. 2xs is the floor, and the longest name (Nocturne)
+     still clears the 92px tile. */
+  font-size: var(--at-text-2xs);
+  font-weight: var(--at-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--at-tracking-2xs);
+}
+.at-preset.is-active::after {
+  content: '';
+  position: absolute;
+  inset-block-start: 4px;
+  inset-inline-end: 4px;
+  width: 12px;
+  height: 12px;
+  background: var(--at-accent);
+  border: var(--at-border-w-sm) solid var(--at-ink);
+  border-radius: var(--at-radius-xs);
+}
+
+/* ══ Typography set list — spec 04 §4 ══
+   A single column rather than the 3-up grid the colour swatches use: a type
+   choice is made by reading, and two family names do not survive a 100px tile
+   at 340px of panel. Each row carries its own font-family inline (see the
+   partial) so it renders as a specimen of the set it selects, not of the set
+   currently active. Everything else — ink border, hard offset, the accent
+   stamp on the active one — is deliberately the same language as .at-preset. */
+.at-type-list {
+  display: grid;
+  gap: var(--at-space-2);
+}
+.at-type {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--at-space-3);
+  width: 100%;
+  cursor: pointer;
+  text-align: start;
+  /* end padding clears the active stamp so a long pair never runs under it */
+  padding: var(--at-space-2) var(--at-space-6) var(--at-space-2) var(--at-space-3);
+  border: var(--at-border-w) solid var(--at-ink);
+  border-radius: var(--at-radius-sm);
+  background: var(--at-surface);
+  box-shadow: var(--at-shadow-2);
+}
+.at-type:hover {
+  background: var(--at-fill-hover);
+}
+.at-type__sample {
+  flex: 0 0 auto;
+  /* 22px was not a step on the scale; xl is the neighbouring one. */
+  font-size: var(--at-text-xl);
+  line-height: 1;
+  font-weight: var(--at-weight-extrabold);
+  color: var(--at-text-strong);
+}
+.at-type__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0; /* lets the pair line ellipsize instead of stretching the row */
+}
+.at-type__set {
+  /* The second of the two 9px sites; see .at-preset__name. */
+  font-size: var(--at-text-2xs);
+  font-weight: var(--at-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--at-tracking-2xs);
+  color: var(--at-text-muted);
+}
+.at-type__pair {
+  font-size: var(--at-text-xs);
+  line-height: 1.3;
+  color: var(--at-text-strong);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.at-type__sep {
+  color: var(--at-text-subtle);
+  margin-inline: 4px;
+}
+.at-type.is-active::after {
+  content: '';
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: 8px;
+  margin-block-start: -6px;
+  width: 12px;
+  height: 12px;
+  background: var(--at-accent);
+  border: var(--at-border-w-sm) solid var(--at-ink);
+  border-radius: var(--at-radius-xs);
+}
+
+/* ══ Command palette — ⌘K — spec 02 §12 ══
+   Dismissed by opacity + visibility, never by `display`. core/command-palette.js
+   used to flip display none↔flex, which left the dialog with nothing to animate
+   in either direction (see base.css §12 for the full reasoning); it now builds
+   the layer once at init and toggles .is-open. pointer-events matters as much as
+   opacity here — the container is a full-viewport `inset: 0` layer, so a
+   transparent-but-live copy of it would swallow every click on the page. */
+.at-command {
+  position: fixed;
+  inset: 0;
+  z-index: var(--at-z-command);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-block-start: 12vh;
+  padding-inline: var(--at-space-4);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity var(--at-motion-base) var(--at-ease-standard),
+    visibility var(--at-motion-base) var(--at-ease-standard);
+}
+.at-command.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+/* The scrim is its own element rather than a background on .at-command.
+   .at-command's inline insets get clamped to the content area so the panel
+   centres beside the sidebar instead of the viewport (positionOverContent in
+   core/command-palette.js), and a tint painted on the container would stop at
+   that clamp — leaving the sidebar undimmed. A separately fixed child ignores
+   the clamp and always covers the full screen. It is also the click-to-close
+   target, which is why it must be a real element and not a ::before. */
+.at-command__backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--at-overlay-backdrop);
+}
+/* position: relative lifts the panel above the scrim without giving the scrim a
+   z-index (both are in the same stacking context; later sibling + positioned
+   wins). max-height caps the dialog so a long result list scrolls internally
+   rather than running off the bottom of a short viewport. */
+.at-command__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 560px;
+  max-height: 70vh;
+  background: var(--at-surface);
+  border: var(--at-border-w) solid var(--at-ink);
+  border-radius: var(--at-radius-md);
+  box-shadow: var(--at-shadow-6);
+  overflow: hidden;
+  /* Drops in from just above its resting place while the scrim fades, so the
+     dialog reads as arriving rather than blinking on. One space step — the
+     offset only has to be legible, and a longer throw at this duration would
+     turn a modal into an animation. */
+  transform: translateY(calc(var(--at-space-2) * -1));
+  transition: transform var(--at-motion-base) var(--at-ease-standard);
+}
+.at-command.is-open .at-command__panel {
+  transform: none;
+}
+.at-command__input-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--at-space-2);
+  flex-shrink: 0;
+  padding: var(--at-space-3) var(--at-space-4);
+  border-block-end: var(--at-border-w-sm) solid var(--at-border);
+}
+.at-command__input-wrap > svg {
+  flex-shrink: 0;
+  width: var(--at-icon-sm);
+  height: var(--at-icon-sm);
+  color: var(--at-text-muted);
+}
+.at-command__input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  font-size: var(--at-text-md);
+  color: var(--at-text);
+  outline: none;
+}
+.at-command__input::placeholder {
+  color: var(--at-text-subtle);
+}
+/* Same chip as .at-search__kbd — the palette echoes the trigger that opened it,
+   swapping the ⌘K hint for the key that dismisses it. */
+.at-command__esc {
+  flex-shrink: 0;
+  line-height: 1;
+  padding: 4px 6px;
+  font-family: var(--at-font-mono);
+  font-size: var(--at-text-2xs);
+  border: var(--at-border-w-sm) solid var(--at-border);
+  border-radius: var(--at-radius-xs);
+  background: var(--at-surface-subtle);
+  color: var(--at-text-muted);
+}
+.at-command__list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--at-space-2);
+}
+/* Rendered as a <button>, so the UA button chrome has to be reset here —
+   otherwise the row arrives with a native border, centered text and the
+   platform font. */
+.at-command__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--at-space-3);
+  width: 100%;
+  padding: var(--at-space-2) var(--at-space-3);
+  border: none;
+  border-radius: var(--at-radius-xs);
+  background: transparent;
+  font: inherit;
+  font-size: var(--at-text-sm);
+  text-align: start;
+  color: var(--at-text);
+  cursor: pointer;
+}
+.at-command__item.is-active,
+.at-command__item:hover {
+  background: var(--at-fill-hover);
+}
+.at-command__item svg {
+  width: var(--at-icon-sm);
+  height: var(--at-icon-sm);
+  color: var(--at-text-muted);
+}
+.at-command__item-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: var(--at-weight-medium);
+  color: var(--at-text-strong);
+}
+/* The slug disambiguates same-titled pages (several "Overview"s live in
+   different sections). It yields to the title and ellipsises rather than
+   wrapping the row onto a second line. */
+.at-command__item-slug {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--at-font-mono);
+  font-size: var(--at-text-2xs);
+  color: var(--at-text-subtle);
+}
+.at-command__empty {
+  padding: var(--at-space-4) var(--at-space-3);
+  text-align: center;
+  font-size: var(--at-text-sm);
+  color: var(--at-text-muted);
+}
+.at-command__group-label {
+  padding: var(--at-space-2) var(--at-space-3);
+  font-size: var(--at-text-2xs);
+  font-weight: var(--at-weight-2xs);
+  letter-spacing: var(--at-tracking-2xs);
+  text-transform: uppercase;
+  color: var(--at-text-subtle);
+}
+
+/* ══ Auth pages — sign in / sign up / reset / lock — spec 03 archetype 8 ══
+   These render under body.at-standalone (base.css §10): no sidebar, no header,
+   a single flex-centred child. Everything below is the anatomy of that child.
+
+   The pages used to be assembled from inline styles plus borrowed sidebar
+   classes — .at-sidebar__brand in particular, which carries `height:
+   var(--at-header-h)` and a bottom border and therefore drew a stray rule
+   across the middle of the card. Naming the parts here keeps the six auth
+   pages consistent with each other and keeps sidebar chrome out. */
+.at-auth {
+  width: 100%;
+  max-width: 420px;
+  padding: var(--at-space-7);
+}
+/* Centred logo lockup. Deliberately NOT .at-sidebar__brand — same stamp and
+   wordmark, none of the sidebar's fixed height, inline padding or divider. */
+.at-auth__brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--at-space-3);
+  margin-block-end: var(--at-space-5);
+  text-decoration: none;
+}
+.at-auth__head {
+  text-align: center;
+  margin-block-end: var(--at-space-6);
+}
+.at-auth__title {
+  font-family: var(--at-font-display);
+  font-size: var(--at-text-2xl);
+  font-weight: var(--at-weight-extrabold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--at-text-strong);
+}
+/* The deck under a 2xl title — same step the page head and the error pages
+   take. It was sm, which put 13px of grey under a 32px uppercase headline. */
+.at-auth__sub {
+  margin-block-start: var(--at-space-2);
+  font-size: var(--at-text-md);
+  line-height: var(--at-leading-md);
+  color: var(--at-text-muted);
+  text-wrap: balance;
+}
+.at-auth__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--at-space-4);
+}
+/* Label row that also carries a trailing link ("Forgot?"). The label keeps its
+   own margin at 0 here — the row owns the gap to the control below it. */
+.at-auth__label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--at-space-3);
+  margin-block-end: var(--at-space-2);
+}
+.at-auth__label-row .at-form-label {
+  margin-block-end: 0;
+}
+/* Password field + reveal toggle. The button is absolutely positioned inside
+   the field rather than sitting beside it in a flex row: a sibling would make
+   the input narrower than every other control on the card, and the misaligned
+   right edge is exactly the kind of thing that reads as "unfinished". */
+.at-auth__control {
+  position: relative;
+}
+.at-auth__control .at-input {
+  padding-inline-end: calc(var(--at-space-3) + var(--at-icon-md) + var(--at-space-2));
+}
+.at-auth__reveal {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: var(--at-space-2);
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--at-space-1);
+  border: none;
+  background: transparent;
+  color: var(--at-text-muted);
+  cursor: pointer;
+  transition: color var(--at-motion-fast) var(--at-ease-standard);
+}
+.at-auth__reveal:hover {
+  color: var(--at-text-strong);
+}
+.at-auth__reveal svg {
+  width: var(--at-icon-sm);
+  height: var(--at-icon-sm);
+}
+/* Checkbox + link on one line above the submit button. Wraps rather than
+   overflowing once the card is narrow enough that they collide. */
+.at-auth__options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--at-space-3);
+  flex-wrap: wrap;
+  font-size: var(--at-text-sm);
+}
+/* Rule with a centred caption ("or continue with"). The two hairlines are
+   pseudo-elements so the caption stays a single text node — no empty spans to
+   translate, and it re-centres itself as the caption changes length. */
+.at-auth__sep {
+  display: flex;
+  align-items: center;
+  gap: var(--at-space-3);
+  margin-block: var(--at-space-5);
+  font-size: var(--at-text-xs);
+  /* muted, not subtle: --at-text-subtle lands this caption at 4.32:1 on the
+     auth card, just under AA, and it is real running text — 13px, uppercase,
+     letter-spaced — not a decorative rule. The lines either side already do
+     the de-emphasis. */
+  color: var(--at-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--at-tracking-2xs);
+}
+.at-auth__sep::before,
+.at-auth__sep::after {
+  content: '';
+  flex: 1 1 auto;
+  height: var(--at-border-w-sm);
+  background: var(--at-border);
+}
+.at-auth__socials {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--at-space-3);
+}
+.at-auth__foot {
+  margin-block-start: var(--at-space-5);
+  text-align: center;
+  font-size: var(--at-text-sm);
+  color: var(--at-text-muted);
+}
+/* Lock screen identity block — avatar over name over email. */
+.at-auth__identity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--at-space-2);
+  margin-block-end: var(--at-space-5);
+}
+.at-auth__identity .at-avatar {
+  width: 64px;
+  height: 64px;
+  font-size: var(--at-text-xl);
+  box-shadow: var(--at-shadow-3);
+}
+.at-auth__identity-name {
+  font-size: var(--at-text-lg);
+  font-weight: var(--at-weight-bold);
+  color: var(--at-text-strong);
+}
+.at-auth__identity-mail {
+  font-family: var(--at-font-mono);
+  font-size: var(--at-text-sm);
+  color: var(--at-text-muted);
+}
+
+/* ── Cover variant ──
+   A contained split card rather than a full-bleed two-column screen: the
+   offset shadow and the hard 2px border ARE the visual language here, and a
+   layout that runs to the viewport edges throws both away. It also means the
+   cover pages need no body-class plumbing — they drop into the same centred
+   .at-standalone flow as the basic ones and simply claim more width. */
+.at-auth-cover {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+  max-width: 1040px;
+  overflow: hidden;
+}
+/* The form column re-uses .at-auth for its internals but drops the width cap —
+   the grid track owns the width now — while keeping the 420px reading measure
+   so the fields do not stretch to half a widescreen. */
+.at-auth-cover__form {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--at-space-7) var(--at-space-6);
+}
+.at-auth-cover__form .at-auth {
+  max-width: 380px;
+  padding: 0;
+}
+.at-auth-cover__panel {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--at-space-6);
+  padding: var(--at-space-7);
+  color: var(--at-on-accent);
+  background-color: var(--at-accent);
+  /* Diagonal hatch instead of a bitmap: keeps the template self-contained (no
+     asset to ship or re-license), themes with the accent token, and stays
+     crisp at any density. */
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgb(0 0 0 / 0.07) 0 2px,
+    transparent 2px 12px
+  );
+  border-inline-start: var(--at-border-w) solid var(--at-ink);
+}
+/* There is deliberately NO stamp override here any more. The panel is an accent
+   field, and the stamp used to be an accent block, so it had to invert to an
+   ink plate with a canvas mark or it would vanish into the ground. The stamp is
+   now the favicon lockup — a frozen ink plate with a frozen terracotta mark
+   (nav.css) — which cannot vanish into an accent field in either mode, at any
+   scheme. Re-pointing it here would only break the one property that makes a
+   brand mark a brand mark: that it looks the same everywhere. Do not re-add. */
+.at-auth-cover__headline {
+  font-family: var(--at-font-display);
+  font-size: var(--at-text-3xl);
+  font-weight: var(--at-weight-extrabold);
+  line-height: var(--at-leading-3xl);
+  letter-spacing: 0.02em;
+  text-wrap: balance;
+}
+/* The cover headline is 3xl (40px); its lede takes the same md step. */
+.at-auth-cover__lede {
+  margin-block-start: var(--at-space-3);
+  font-size: var(--at-text-md);
+  line-height: var(--at-leading-md);
+  opacity: 0.85;
+}
+.at-auth-cover__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--at-space-3);
+  font-size: var(--at-text-sm);
+  font-weight: var(--at-weight-medium);
+}
+.at-auth-cover__list li {
+  display: flex;
+  align-items: center;
+  gap: var(--at-space-3);
+}
+.at-auth-cover__list svg {
+  width: var(--at-icon-sm);
+  height: var(--at-icon-sm);
+  flex-shrink: 0;
+}
+/* Below this the panel is dead weight — it would either squeeze the form into
+   an unusable column or push it off the fold. The card then collapses to the
+   same single-column shape as the basic variant. */
+@media (min-width: 880px) {
+  .at-auth-cover {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    min-height: 560px;
+  }
+  .at-auth-cover__panel {
+    display: flex;
+  }
+}
+
+} /* end @layer components */

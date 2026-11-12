@@ -1,0 +1,97 @@
+/* ════════════════════════════════════════════════════════════════════════
+   Atelier — app.css (single stylesheet entry)
+   Bold Press design language · Tailwind CSS v4 foundation
+   ────────────────────────────────────────────────────────────────────────
+   Load order (token law — primitives → roles → themes → recipes):
+     1. tailwindcss          (Tailwind v4 base)
+     2. token chain          (3-layer cascade, --at-* namespace)
+     3. app layers           (base → components → nav → shell → utilities)
+     4. schemes              (chrome-only sidebar/header surface schemes)
+     5. @theme bridge        (--at-* role tokens → Tailwind utilities)
+
+   Every value in the app layers resolves through a --at-* token. No file below
+   this line invents a hex, radius, spacing, or motion value — they all live in
+   the token chain. (Spec 01 is law; this file is the orchestration.)
+   ════════════════════════════════════════════════════════════════════════ */
+
+@import 'tailwindcss';
+
+/* ── Layer 1–3 token system (Bold Press values, spec names) ── */
+@import './tokens/_primitives.css'; /* L1 scales + ink/shadow system + semantic ramps */
+@import './tokens/_roles.css'; /* L2 role aliases — light :root + [data-at-theme=dark] */
+@import './tokens/_themes.css'; /* 11 colour schemes (light + dark compound); Atelier is inline on :root */
+@import './tokens/_typography.css'; /* 11 type sets — independent axis; Atelier is inline on :root */
+@import './tokens/_charts.css'; /* constant data-viz palette, chart-1 = accent */
+@import './tokens/_recipes.css'; /* Bold Press primitives: .at-card, .at-press, .at-stamp, focus */
+
+/* ── App layers ── */
+@import './base.css';
+@import './components.css';
+@import './nav.css';
+@import './shell.css';
+@import './utilities.css';
+
+/* ── Surface schemes (sidebar/header chrome) ── */
+@import './schemes.css';
+
+/* ════════════════════════════════════════════════════════════════════════
+   @theme bridge — maps --at-* role tokens to Tailwind utility namespaces.
+   Values are late-bound via var(), so a theme/dark/preset swap at runtime
+   re-paints every utility with no rebuild. (Mirrors spec 12 §5.2.)
+   ════════════════════════════════════════════════════════════════════════ */
+@theme {
+  /* breakpoints */
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+  --breakpoint-2xl: 1400px;
+
+  /* role colors → utilities (bg-canvas, text-ink, border-default, text-accent …) */
+  --color-canvas: var(--at-canvas);
+  --color-surface: var(--at-surface);
+  --color-surface-subtle: var(--at-surface-subtle);
+  --color-surface-raised: var(--at-surface-raised);
+  --color-surface-overlay: var(--at-surface-overlay);
+  --color-ink: var(--at-ink);
+  --color-border-default: var(--at-border);
+  --color-border-strong: var(--at-border-strong);
+  --color-text-strong: var(--at-text-strong);
+  --color-text: var(--at-text);
+  --color-text-muted: var(--at-text-muted);
+  --color-text-subtle: var(--at-text-subtle);
+  --color-accent: var(--at-accent);
+  --color-accent-hover: var(--at-accent-hover);
+  --color-accent-wash: var(--at-accent-wash);
+  --color-on-accent: var(--at-on-accent);
+  --color-secondary: var(--at-secondary);
+  --color-tertiary: var(--at-tertiary);
+  --color-lime: var(--at-lime);
+  --color-success: var(--at-success);
+  --color-warning: var(--at-warning);
+  --color-danger: var(--at-danger);
+  --color-info: var(--at-info);
+
+  /* radii (Bold Press — tight, sharp geometry) */
+  --radius-none: var(--at-radius-none);
+  --radius-xs: var(--at-radius-xs);
+  --radius-sm: var(--at-radius-sm);
+  --radius-md: var(--at-radius-md);
+  --radius-lg: var(--at-radius-lg);
+  --radius-xl: var(--at-radius-xl);
+  --radius-pill: var(--at-radius-pill);
+
+  /* fonts */
+  --font-sans: var(--at-font-sans);
+  --font-display: var(--at-font-display);
+  --font-mono: var(--at-font-mono);
+
+  /* shadows — Bold Press hard offset (no blur) */
+  --shadow-none: var(--at-shadow-none);
+  --shadow-sm: var(--at-shadow-2);
+  --shadow-md: var(--at-shadow-3);
+  --shadow-lg: var(--at-shadow-4);
+  --shadow-xl: var(--at-shadow-6);
+  --shadow-card: var(--at-shadow-card);
+  --shadow-press: var(--at-shadow-press);
+}

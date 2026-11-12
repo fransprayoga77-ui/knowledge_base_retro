@@ -1,0 +1,496 @@
+/* ════════════════════════════════════════════════════════════════════════
+   nav.css — sidebar navigation tree — spec 03 §5
+   The sidebar chrome (regions/brand/user/CTA) lives here; the six sidebar
+   *styles* (geometry) live in base.css §6.
+   Wrapped in @layer components so nav items compete fairly with the rest of
+   the component library (same cascade level as .at-btn).
+   ════════════════════════════════════════════════════════════════════════ */
+@layer components {
+  /* Brand block — spec 02 §2.2 */
+  .at-sidebar__brand {
+    display: flex;
+    align-items: center;
+    gap: var(--at-space-3);
+    height: var(--at-header-h);
+    padding-inline: var(--at-space-5);
+    border-block-end: var(--at-border-w) solid var(--at-border);
+    flex-shrink: 0;
+    /* The brand row is an <a> to the app root. Both children pin their own
+       colour — the stamp to the two frozen brand values below, the wordmark to
+       --at-text-strong — so nothing visibly inherits today; this is here so
+       nothing can start to. Without it the element's colour comes from base's
+       `a` / `a:hover`, and a later edit that drops the wordmark's colour would
+       silently turn the logo into link text on hover. In the components layer
+       this beats both base rules outright, specificity aside. */
+    color: inherit;
+  }
+  /* The brand stamp is src/assets/favicon.svg — the mark buyers already meet in
+     the browser tab. It is an ACCENT mark on an INK plate, full-bleed and
+     square-cornered: the exact inverse of the token-driven stamp that stood
+     here before (colour block, ink border, on-token mark).
+
+     That inverse is only safe because BOTH colours are frozen. Driving the mark
+     from --at-accent is what fails, and it fails hard — measured against the
+     ink of each scheme, five of the twelve never reach 4.5:1:
+       stencil 2.04   primer 2.13   lacquer 2.38   violet 2.90   gantry 3.68
+     The six-preset table this comment used to carry recorded the same collapse
+     from the other side, plus a worse one in dark, where --at-ink IS the light
+     colour and the mark sat cream-on-cream. Pinned to the two brand values
+     below, the pair is 7.10:1 in all 24 states — the ratio _roles.css:109
+     retuned the Atelier accent to hit — because neither side can move.
+
+     So this is deliberately the one element in the system that does NOT theme,
+     and .at-auth-cover__panel no longer re-points it (see shell.css). A brand
+     mark is a fixed colour: the favicon ships as one SVG and the browser draws
+     it unchanged on every scheme and both modes. A stamp that tracked
+     --at-accent would stop matching the artefact it is copied from. */
+  .at-sidebar__stamp {
+    display: inline-flex;
+    /* 36px and 3px are brand geometry, not UI geometry, which is why neither
+       reads a token: 3px sits off the radius scale entirely (2/4/6/8/12) and
+       the plate is sized to the mark rather than to any icon slot. Frozen for
+       the same reason the two colours below are — see the header comment.
+       NOTE: at 36px the plate no longer divides the 72px compact rail the way
+       32px did (20px padding + 32 + 20 = exactly 72, centred by arithmetic).
+       The brand row now centres explicitly and drops its inline padding when
+       compact/collapsed — see the compact block further down, beside the
+       .at-nav__item rule that does the same. Changing either number here means
+       re-checking that rail. */
+    width: 36px;
+    height: 36px;
+    border-radius: 3px;
+    background: #2e2317; /* brand ink — the light --at-ink of _roles.css, frozen */
+    color: #ff946f; /* brand terracotta — _roles.css:109, frozen */
+    /* Keyline, so the plate's edge still reads on a dark ground, where ink on
+       canvas is ~1.2:1 and the block would otherwise dissolve. --at-border is
+       the scheme ink in light (near-black on near-black — invisible, which is
+       the intent) and the impression in dark, drawn at 2.87:1. One rule, no
+       per-mode branching. */
+    border: var(--at-border-w) solid var(--at-border);
+    flex-shrink: 0;
+  }
+  /* Full-bleed: the favicon positions its shapes against the whole 32-unit box,
+     so the svg fills the plate instead of sitting inset the way an icon does. */
+  .at-sidebar__stamp svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .at-sidebar__wordmark {
+    font-family: var(--at-font-display);
+    font-size: var(--at-text-lg);
+    font-weight: var(--at-weight-extrabold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--at-text-strong);
+  }
+
+  /* Workspace switcher (optional) */
+  .at-sidebar__ws {
+    display: flex;
+    align-items: center;
+    gap: var(--at-space-2);
+    margin: var(--at-space-3);
+    padding: var(--at-space-2) var(--at-space-3);
+    border: var(--at-border-w-sm) solid var(--at-border);
+    border-radius: var(--at-radius-sm);
+    background: var(--at-surface-subtle);
+  }
+
+  /* Nav scroll region — scrolls, but the bar itself is hidden so the rail
+     reads as one clean column (base.css §2 styles scrollbars globally; this
+     opts the sidebar out). */
+  .at-sidebar__nav {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: var(--at-space-3);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .at-sidebar__nav::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+
+  /* Section eyebrow */
+  .at-sidebar__section {
+    font-family: var(--at-font-sans);
+    font-size: var(--at-text-2xs);
+    font-weight: var(--at-weight-2xs);
+    letter-spacing: var(--at-tracking-2xs);
+    text-transform: uppercase;
+    /* muted, not subtle. These are the sidebar's structural labels — the only
+       thing naming what a group of links is — and --at-text-subtle put them at
+       4.32:1, under AA. They read as decoration in a desktop screenshot only
+       because the collapsed rail hides them; open the drawer at 375px and
+       there are 470 of them across the template, all failing. Size and
+       tracking already carry the de-emphasis without spending contrast. */
+    color: var(--at-text-muted);
+    padding: var(--at-space-4) var(--at-space-3) var(--at-space-2);
+  }
+
+  /* Nav item — spec 03 §5.2 */
+  .at-nav__item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--at-space-3);
+    padding: var(--at-space-2) var(--at-space-3);
+    margin-block-end: 2px;
+    border-radius: var(--at-radius-sm);
+    font-size: var(--at-text-sm);
+    font-weight: var(--at-weight-medium);
+    color: var(--at-text);
+    text-decoration: none;
+    min-height: 38px;
+    transition:
+      background var(--at-motion-fast) var(--at-ease-standard),
+      color var(--at-motion-fast) var(--at-ease-standard);
+  }
+  .at-nav__item:hover {
+    background: var(--at-fill-hover);
+    color: var(--at-text-strong);
+  }
+  .at-nav__item.is-active {
+    background: var(--at-accent-wash);
+    color: var(--at-text-strong);
+    font-weight: var(--at-weight-bold);
+  }
+  .at-nav__icon {
+    width: var(--at-icon-md);
+    height: var(--at-icon-md);
+    flex-shrink: 0;
+  }
+  .at-nav__label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .at-nav__badge {
+    margin-inline-start: auto;
+  }
+
+  /* Collapsible group */
+  .at-nav__group-head {
+    display: flex;
+    align-items: center;
+    gap: var(--at-space-3);
+    padding: var(--at-space-2) var(--at-space-3);
+    margin-block-end: 2px;
+    border-radius: var(--at-radius-sm);
+    font-size: var(--at-text-sm);
+    font-weight: var(--at-weight-semibold);
+    color: var(--at-text-strong);
+    width: 100%;
+    text-align: start;
+    min-height: 38px;
+    cursor: pointer;
+    /* Same clock as .at-nav__item — the two sit interleaved in one list and
+       are the same row to the eye, so one must not snap while the other eases. */
+    transition: background var(--at-motion-fast) var(--at-ease-standard);
+  }
+  .at-nav__group-head:hover {
+    background: var(--at-fill-hover);
+  }
+  .at-nav__caret {
+    width: var(--at-icon-sm);
+    height: var(--at-icon-sm);
+    margin-inline-start: auto;
+    transition: transform var(--at-motion-fast) var(--at-ease-standard);
+  }
+  .at-nav__group.is-open .at-nav__caret {
+    transform: rotate(90deg);
+  }
+  .at-nav__group-body {
+    padding-inline-start: var(--at-space-4);
+  }
+
+  /* Nested levels indent */
+  .at-nav__group-body .at-nav__item {
+    font-size: var(--at-text-sm);
+  }
+
+  /* Sidebar CTA card */
+  .at-sidebar__cta {
+    margin: var(--at-space-3);
+    padding: var(--at-space-4);
+    background: var(--at-accent);
+    color: var(--at-on-accent);
+    border: var(--at-border-w) solid var(--at-ink);
+    border-radius: var(--at-radius-md);
+    box-shadow: var(--at-shadow-3);
+  }
+  .at-sidebar__cta h5 {
+    color: var(--at-on-accent);
+    margin-block-end: var(--at-space-1);
+  }
+  /* Real sentence copy in the promo card, so it takes the paragraph floor. */
+  .at-sidebar__cta p {
+    font-size: var(--at-text-sm);
+    opacity: 0.9;
+    margin-block-end: var(--at-space-3);
+  }
+  /* The panel is already accent, so the dark button's default accent offset
+     block (components.css §1) would disappear into it — so the block has to be
+     re-picked here. It has two neighbours to clear, not one: the accent panel
+     behind it and the button's own ink field in front of it.
+
+     --at-on-accent clears only the panel. In every light preset it resolves to
+     --at-ink, and --at-btn--dark fills with --at-ink-strong, which _roles.css
+     aliases to --at-ink in light — so field, border and block came out the same
+     colour and the button read as one flat slab with no lift at all.
+
+     --at-canvas clears both, and does so by construction rather than by luck:
+     it is the colour --at-btn--dark already uses for its own label, so it is
+     legible against the field by definition, and the accent is a chip colour
+     the system places on canvas, so it separates from the panel by definition
+     too. Holds through the dark presets, where ink and canvas trade places and
+     both relationships simply invert. */
+  .at-sidebar__cta .at-btn {
+    --at-shadow-color: var(--at-canvas);
+  }
+  /* Same collision as the offset block, one property along: the global
+     highlight (base.css §0) is an accent plate, and this panel is already
+     accent, so selecting the CTA's copy would paint accent on accent and the
+     highlight would not appear at all.
+
+     On an accent ground the highlight is simply the panel inverted — the
+     foreground the panel already trusts on itself becomes the plate, and the
+     accent becomes the type. That is the same on-accent contract read
+     backwards, so it is legible by construction in every preset and both
+     themes, and it needs no dark override for the same reason the tokens
+     don't. Written as a full ::selection rule rather than by redeclaring
+     --at-select-bg here, since highlight pseudos do not inherit custom
+     properties off their originating element. */
+  .at-sidebar__cta::selection,
+  .at-sidebar__cta ::selection {
+    background: var(--at-on-accent);
+    color: var(--at-accent);
+  }
+
+  /* User block */
+  .at-sidebar__user {
+    display: flex;
+    align-items: center;
+    gap: var(--at-space-3);
+    /* Was a hard `height: 50px`, which gave a 26px content box that the
+       48px name+email stack overflowed. The identity block now hugs its
+       own content; 50px is kept as the floor so the collapsed rail (which
+       hides the avatar and shows only the sign-out icon) is unchanged. */
+    min-block-size: 50px;
+    padding: var(--at-space-3);
+    border-block-start: var(--at-border-w) solid var(--at-border);
+    flex-shrink: 0;
+  }
+  /* Sized here rather than by swapping the modifier in markup: .at-avatar--sm
+     is shared with the header, tables and lists, so widening it there would
+     resize avatars template-wide. */
+  .at-sidebar__user .at-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: var(--at-text-sm);
+  }
+  .at-sidebar__user-info {
+    flex: 1;
+    min-width: 0;
+  }
+  /* Both lines carry an explicit leading. Without it they inherit body's
+     --at-leading-base (24px), so a 14px name and a 13px email each float in
+     a 24px line box and ~10px of dead leading opens up between them. Tight
+     boxes put the visible gap at ~4px, the house title/subtitle step. */
+  .at-sidebar__user-name {
+    font-size: var(--at-text-sm);
+    line-height: var(--at-leading-sm);
+    font-weight: var(--at-weight-bold);
+    color: var(--at-text-strong);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .at-sidebar__user-email {
+    font-size: var(--at-text-xs);
+    line-height: var(--at-leading-2xs);
+    color: var(--at-text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ── Compact / collapsed rail — spec 03 §8 (icon-only) ──
+   The rail shows icons only. Child lists (.at-nav__group-body) are hidden
+   entirely, with `!important` so no inline style can re-show them. The
+   nested items are
+   instead revealed inside a flyout popover (see .at-nav__flyout below)
+   that opens on hover/focus of the group.
+
+   DESKTOP ONLY — gated to the same 993px hinge as base.css §6 and the
+   hamburger rule in shell.css. Below it the sidebar is a drawer, not a rail,
+   and `data-at-collapsed='true'` is the DEFAULT state, so ungated these rules
+   stripped the mobile drawer of every label, section heading, wordmark, user
+   block and CTA — a 256px panel of unlabelled icons.
+
+   The `.at-nav__group-body` line was the worst of it. It is `display: none
+   !important`, and the flyout that replaces nested items on the desktop rail
+   is itself display:none below 992px (see the media query further down), so
+   nested routes had no reachable affordance on a phone at all: the accordion
+   was suppressed and its replacement was switched off. `isRail()` in
+   lib/sidebar.ts already returns false on mobile precisely so the inline
+   accordion keeps working there — this wrapper is what makes that true. */
+  @media (min-width: 993px) {
+    [data-at-sidebar-style='compact'] .at-nav__label,
+    [data-at-sidebar-style='compact'] .at-nav__badge,
+    [data-at-sidebar-style='compact'] .at-nav__caret,
+    [data-at-sidebar-style='compact'] .at-nav__group-head > span,
+    [data-at-sidebar-style='compact'] .at-sidebar__section,
+    [data-at-sidebar-style='compact'] .at-sidebar__wordmark,
+    [data-at-sidebar-style='compact'] .at-sidebar__user-info,
+    [data-at-sidebar-style='compact'] .at-sidebar__user-email,
+    [data-at-sidebar-style='compact'] .at-sidebar__cta,
+    [data-at-sidebar-style='compact'] .at-nav__group-body,
+    [data-at-collapsed='true'] .at-nav__label,
+    [data-at-collapsed='true'] .at-nav__badge,
+    [data-at-collapsed='true'] .at-nav__caret,
+    [data-at-collapsed='true'] .at-nav__group-head > span,
+    [data-at-collapsed='true'] .at-sidebar__section,
+    [data-at-collapsed='true'] .at-sidebar__wordmark,
+    [data-at-collapsed='true'] .at-sidebar__user-info,
+    [data-at-collapsed='true'] .at-sidebar__user-email,
+    [data-at-collapsed='true'] .at-sidebar__cta,
+    [data-at-collapsed='true'] .at-nav__group-body {
+      display: none !important;
+    }
+    [data-at-sidebar-style='compact'] .at-nav__item,
+    [data-at-sidebar-style='compact'] .at-nav__group-head,
+    [data-at-collapsed='true'] .at-nav__item,
+    [data-at-collapsed='true'] .at-nav__group-head {
+      justify-content: center;
+      padding-inline: 0;
+    }
+
+    /* Brand row, same treatment. It used to need no rule at all: the 32px stamp
+       plus the row's 20px inline padding summed to exactly the 72px rail, so it
+       centred by arithmetic. The 36px plate breaks that sum and would otherwise
+       overflow the rail by 4px — flex-shrink: 0 means it cannot absorb the
+       difference. Centring explicitly makes the fit independent of both numbers. */
+    [data-at-sidebar-style='compact'] .at-sidebar__brand,
+    [data-at-collapsed='true'] .at-sidebar__brand {
+      justify-content: center;
+      padding-inline: 0;
+    }
+
+    /* Active group: accent the icon when one of its children is active. Keyed on
+       .is-trail (set by nav.js from the resolved route), NOT .is-open — the
+       latter is expand/collapse state that every header click flips, so in the
+       rail each clicked icon stayed accented and they piled up. */
+    [data-at-sidebar-style='compact'] .at-nav__group.is-trail > .at-nav__group-head,
+    [data-at-collapsed='true'] .at-nav__group.is-trail > .at-nav__group-head {
+      background: var(--at-accent-wash);
+      color: var(--at-text-strong);
+    }
+
+    /* User block: show only the sign-out icon, centered. */
+    [data-at-sidebar-style='compact'] .at-sidebar__user,
+    [data-at-collapsed='true'] .at-sidebar__user {
+      justify-content: center;
+      padding: var(--at-space-2) var(--at-space-3);
+    }
+    [data-at-sidebar-style='compact'] .at-sidebar__user .at-avatar,
+    [data-at-collapsed='true'] .at-sidebar__user .at-avatar {
+      display: none;
+    }
+  }
+
+  /* ── Flyout popover (collapsed/compact rail) ──
+     A single layer portaled to <body> by the atSidebar component and
+     positioned with Floating UI against the hovered group head. Living
+     OUTSIDE .at-sidebar__nav is the whole point: that region is an overflow
+     scroll container (overflow-y:auto / overflow-x:hidden), which clips any
+     absolutely-positioned descendant — a flyout anchored inside a group got
+     cut off at the rail's edges. On <body> it escapes that clip entirely, and
+     Floating UI's flip()/shift() keep it on-screen at every edge.
+     Hidden by default; the JS-set [data-open] attribute reveals it.
+
+     `visibility` is in the transition list on purpose. It was not, and that is
+     why the popover faded in but vanished on close: visibility is a discrete
+     property, so an untransitioned visible→hidden applies on the first frame and
+     the 140ms fade underneath it plays to an already-hidden element. Transitioned,
+     it holds `visible` for the whole duration and flips at the end — which is
+     also why it can stay in the shorthand list rather than being special-cased. */
+  .at-nav__flyout {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: var(--at-z-dropdown);
+    min-width: 220px;
+    padding: var(--at-space-2);
+    background: var(--at-surface);
+    border: var(--at-border-w) solid var(--at-ink);
+    border-radius: var(--at-radius-md);
+    box-shadow: var(--at-shadow-6);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    /* Slides out of the rail it belongs to — one space step toward the icon
+       that opened it, mirrored under RTL because the popover flips to the other
+       side there (placement is left-start; see NavFlyout.tsx). left/top come
+       from Floating UI, so this offset rides on top of them untouched. */
+    transform: translateX(calc(var(--at-space-2) * -1));
+    transition:
+      opacity var(--at-motion-fast) var(--at-ease-standard),
+      transform var(--at-motion-fast) var(--at-ease-standard),
+      visibility var(--at-motion-fast) var(--at-ease-standard);
+  }
+  .at-nav__flyout[dir='rtl'] {
+    transform: translateX(var(--at-space-2));
+  }
+  /* Reveal. left/top are written inline by Floating UI's computePosition.
+     Must stay below the [dir='rtl'] rule above — both are (0,2,0), so source
+     order is the only thing that lets `transform: none` win in RTL. */
+  .at-nav__flyout[data-open] {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: none;
+  }
+  /* Flyout title — the group's name, restored for context. */
+  .at-nav__flyout__title {
+    font-family: var(--at-font-display);
+    font-size: var(--at-text-2xs);
+    font-weight: var(--at-weight-2xs);
+    letter-spacing: var(--at-tracking-2xs);
+    text-transform: uppercase;
+    color: var(--at-text-subtle);
+    padding: var(--at-space-2) var(--at-space-3) var(--at-space-1);
+  }
+  /* Inside the flyout the items lay out vertically with full labels. The
+     portaled flyout still lives under [data-at-collapsed], so the rail's
+     `display:none !important` (icons-only) above also hides .at-nav__label /
+     badge / caret here — override them so the popover shows real text. */
+  .at-nav__flyout .at-nav__item {
+    justify-content: flex-start;
+    padding-inline: var(--at-space-3);
+  }
+  .at-nav__flyout .at-nav__label,
+  .at-nav__flyout .at-nav__badge,
+  .at-nav__flyout .at-nav__caret {
+    display: revert !important;
+  }
+  /* On tablet/mobile the rail becomes a drawer; a flyout would clash with the
+     backdrop, so disable it and rely on the inline accordion instead. (Desktop
+     gating — collapsed vs expanded — is enforced in JS via hoverGroup.) */
+  @media (max-width: 992px) {
+    .at-nav__flyout {
+      display: none !important;
+    }
+  }
+
+  /* mobile: hide brand wordmark on very narrow */
+  @media (max-width: 520px) {
+    .at-sidebar__user-email {
+      display: none;
+    }
+  }
+} /* end @layer components */

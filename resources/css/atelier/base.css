@@ -1,0 +1,627 @@
+/* ════════════════════════════════════════════════════════════════════════
+   base.css — reset, root typography, app-shell layout, layout-state attributes
+   Bold Press · spec 01 values, spec 03 structure
+   Wrapped in @layer base so the cascade order (theme → base → components →
+   utilities) is enforced. Without this, unlayered rules here would defeat
+   the components layer (e.g. `button { border: none }` was stripping every
+   .at-btn / .at-icon-btn border, since unlayered > layered in CSS cascade).
+   ════════════════════════════════════════════════════════════════════════ */
+@layer base {
+  /* ── §0 Reset / normalize ── */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+  * {
+    margin: 0;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  body {
+    min-height: 100vh;
+    font-family: var(--at-font-sans);
+    font-size: var(--at-text-base);
+    line-height: var(--at-leading-base);
+    color: var(--at-text);
+    background: var(--at-canvas);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  img,
+  picture,
+  svg,
+  video {
+    display: block;
+    max-width: 100%;
+  }
+  input,
+  button,
+  textarea,
+  select {
+    font: inherit;
+    color: inherit;
+  }
+  button {
+    cursor: pointer;
+    background: none;
+    /* NOTE: do NOT set `border: none` here — it would strip borders from every
+     .at-btn / .at-icon-btn in the components layer. Tailwind preflight's
+     `button { border: 0 solid }` already gives a sane default; components
+     layer then paints the real Bold Press border on top. */
+  }
+  a {
+    color: var(--at-link);
+    text-decoration: none;
+  }
+  a:hover {
+    color: var(--at-link-hover);
+  }
+  ul,
+  ol {
+    list-style: none;
+    padding: 0;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  hr {
+    border: none;
+    border-block-start: var(--at-border-w-sm) solid var(--at-border);
+  }
+  /* Highlight = an accent plate with the type re-inked on top of it; see the
+     selection tokens in tokens/_roles.css. Both sides are spent as var() here
+     rather than as a locally overridable pair, because a highlight pseudo does
+     NOT reliably inherit custom properties through the element it originates
+     from — only through the highlight chain. Root-level tokens resolve; a
+     --at-select-bg redeclared on a panel would silently not. Any ground that
+     needs a different highlight therefore writes its own ::selection rule, as
+     the accent CTA does in nav.css.
+     text-shadow is cleared because the UA default paints one under selected
+     text in some engines, which fogs an otherwise solid Bold Press plate. */
+  ::selection {
+    background: var(--at-select-bg);
+    color: var(--at-select-fg);
+    text-shadow: none;
+  }
+
+  /* ── §1 Root typography — spec 01 §4 ── */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--at-font-display);
+    color: var(--at-text-strong);
+    line-height: 1.15;
+  }
+  h1 {
+    font-size: var(--at-text-2xl);
+    font-weight: var(--at-weight-2xl);
+    letter-spacing: var(--at-tracking-2xl);
+  }
+  h2 {
+    font-size: var(--at-text-xl);
+    font-weight: var(--at-weight-xl);
+    letter-spacing: var(--at-tracking-xl);
+  }
+  h3 {
+    font-size: var(--at-text-lg);
+    font-weight: var(--at-weight-lg);
+  }
+  h4 {
+    font-size: var(--at-text-md);
+    font-weight: var(--at-weight-semibold);
+  }
+  /* h5 and h6 were sm (13px) and xs (12px) against a 14px body — both
+     rendered SMALLER than the paragraphs they introduced, so the only thing
+     marking them as headings was the 600 weight. A heading that is shorter
+     than its own body text is not a level, it is a bold sentence.
+
+     h5 now sits AT body size, which is the floor for anything set in
+     lowercase: below it, weight alone has to do the work and stops being
+     enough. h6 is deliberately the exception — it drops to sm and switches
+     register instead, to caps on the 2xs tracking. That is the eyebrow idiom
+     this system already uses for .at-eyebrow and the KPI label, and caps at 13
+     read as MORE prominent than 15px lowercase, so the ladder keeps
+     descending even though the pixel count goes back up. */
+  h5 {
+    font-size: var(--at-text-base);
+    font-weight: var(--at-weight-semibold);
+  }
+  h6 {
+    font-size: var(--at-text-sm);
+    font-weight: var(--at-weight-semibold);
+    letter-spacing: var(--at-tracking-2xs);
+    text-transform: uppercase;
+  }
+
+  /* numerics — mono, tabular (spec 01 §4, principle 7) */
+  .at-num,
+  [data-at-tabular] {
+    font-family: var(--at-font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* display font helper */
+  .at-display {
+    font-family: var(--at-font-display);
+  }
+
+  /* ── §2 Custom scrollbars (subtle, theme-aware) ── */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--at-ink) 22%, transparent) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--at-ink) 22%, transparent);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    border-radius: var(--at-radius-pill);
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--at-ink) 38%, transparent);
+    background-clip: padding-box;
+  }
+
+  /* ── §3 App-shell layout — spec 03 §3 ── */
+  .at-layout {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+  }
+
+  /* Sidebar */
+  .at-sidebar {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    z-index: var(--at-z-sidebar);
+    display: flex;
+    flex-direction: column;
+    width: var(--at-sidebar-w);
+    background: var(--at-sidebar-bg, var(--at-surface));
+    border-inline-end: var(--at-border-w) solid var(--at-border);
+    color: var(--at-sidebar-text, var(--at-text));
+    /* Two gestures, one duration: `transform` is the mobile drawer sliding in
+       off-canvas (§13), `width` is the desktop rail collapsing to 72px (§6).
+       Sharing --at-motion-slow / --at-ease-standard makes them read as the same
+       motion rather than two unrelated animations that happen to move a sidebar.
+       See the note on .at-shell below for why this animates width and not
+       transform. */
+    transition:
+      transform var(--at-motion-slow) var(--at-ease-standard),
+      width var(--at-motion-slow) var(--at-ease-standard);
+  }
+  .at-shell {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-inline-start: var(--at-sidebar-w);
+    min-height: 100vh;
+    /* The shell and the header must travel with the rail or the collapse tears:
+       the sidebar would slide to 72px while the content jumped there in one
+       frame. All three animate the same property-triple that §6 rewrites —
+       width / margin-inline-start / inset-inline-start.
+
+       These are layout properties, so each frame reflows rather than riding the
+       compositor. That is the deliberate trade: a transform-based fake would
+       have to scale or translate content that then has to re-lay-out anyway at
+       the end, which is what produces the snap-back most rails have. 280ms of
+       honest reflow on a once-per-interaction gesture is the cheaper artefact.
+
+       No flash on load: head.html sets data-at-collapsed in a blocking inline
+       script, so the collapsed geometry is the FIRST painted style and there is
+       no prior value to transition from. Moving that write into React would
+       make every page load animate open. */
+    transition: margin-inline-start var(--at-motion-slow) var(--at-ease-standard);
+  }
+
+  /* Header */
+  .at-header {
+    position: fixed;
+    top: 0;
+    inset-inline: var(--at-sidebar-w) 0;
+    z-index: var(--at-z-header);
+    display: flex;
+    align-items: center;
+    gap: var(--at-space-3);
+    height: var(--at-header-h);
+    padding-inline: var(--at-space-5);
+    background: var(--at-header-bg, var(--at-surface));
+    border-block-end: var(--at-border-w) solid var(--at-border);
+    color: var(--at-header-text, var(--at-text));
+    /* inset-inline-start, not margin: the header is fixed and §6 moves it by
+       inset alone (see the §6 note — setting both makes the offsets add). */
+    transition: inset-inline-start var(--at-motion-slow) var(--at-ease-standard);
+  }
+
+  /* Main content */
+  .at-main {
+    flex: 1 1 auto;
+    margin-block-start: var(--at-header-h);
+    padding: var(--at-space-6);
+    min-width: 0;
+  }
+
+  /* Footer */
+  .at-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--at-space-4);
+    height: var(--at-footer-h);
+    padding-inline: var(--at-space-6);
+    border-block-start: var(--at-border-w) solid var(--at-border);
+    background: var(--at-surface);
+    color: var(--at-text-muted);
+    font-size: var(--at-text-sm);
+  }
+
+  /* ── §4 Width modes — spec 03 §11.1 ── */
+  [data-at-width='fluid'] .at-main {
+    max-width: 100%;
+  }
+  [data-at-width='full'] .at-main {
+    max-width: 100%;
+    padding-inline: 0;
+  }
+  [data-at-width='boxed'] .at-main {
+    max-width: var(--at-container-boxed);
+    margin-inline: auto;
+  }
+
+  /* ── §5 Static positions — spec 03 §6 ── */
+  [data-at-header-position='static'] .at-header {
+    position: static;
+    inset-inline: 0;
+  }
+  [data-at-header-position='static'] .at-main {
+    margin-block-start: 0;
+  }
+  [data-at-sidebar-position='static'] .at-sidebar {
+    position: static;
+  }
+  [data-at-sidebar-position='static'] .at-shell {
+    margin-inline-start: 0;
+  }
+
+  /* ── §6 Sidebar styles — spec 03 §8 ──
+   For each variant the .at-shell (static) and .at-header (fixed) must be
+   handled separately: the shell is offset by margin-inline-start only, while
+   the fixed header is positioned by inset-inline-start only. Combining both
+   on the header makes the two values *add* (e.g. 72px inset + 72px margin →
+   header rendered at 144px), leaving a gap the width of the rail between it
+   and the sidebar.
+
+   ── DESKTOP ONLY, AND IT HAS TO BE A MEDIA QUERY ─────────────────────────
+   Below 993px the sidebar is not a rail at all, it is an off-canvas drawer
+   (§13). Every rule in this section is therefore gated to the complement of
+   §13's max-width: 992px — the same 993px hinge shell.css uses to hide the
+   hamburger.
+
+   Gating is not cosmetic tidiness, it is the fix for a real cascade bug.
+   These selectors are (0,2,0) — attribute + class — while §13 resets with a
+   bare `.at-shell, .at-header` at (0,1,0). Specificity beats source order and
+   media queries add none, so WITHOUT this wrapper the rail geometry wins on
+   mobile and §13's reset is dead code. `data-at-collapsed='true'` is the
+   default state (head.html writes it when no opt-out key is stored), so that
+   was every phone visit, not an edge case: the shell and header sat 72px in
+   from the left with nothing in the gap — the sidebar being off-canvas — and
+   the drawer then opened 72px wide instead of 256px.
+
+   Keep any new sidebar-style variant inside this wrapper for the same reason. */
+
+  @media (min-width: 993px) {
+    /* compact: icon-only rail */
+    [data-at-sidebar-style='compact'] .at-sidebar {
+      width: var(--at-sidebar-w-compact);
+    }
+    [data-at-sidebar-style='compact'] .at-shell {
+      margin-inline-start: var(--at-sidebar-w-compact);
+    }
+    [data-at-sidebar-style='compact'] .at-header {
+      inset-inline-start: var(--at-sidebar-w-compact);
+    }
+
+    /* collapsed (toggle) */
+    [data-at-collapsed='true'] .at-sidebar {
+      width: var(--at-sidebar-w-compact);
+    }
+    [data-at-collapsed='true'] .at-shell {
+      margin-inline-start: var(--at-sidebar-w-compact);
+    }
+    [data-at-collapsed='true'] .at-header {
+      inset-inline-start: var(--at-sidebar-w-compact);
+    }
+  }
+
+  /* The rail is the one place in the shell where a full-width layout property
+     animates, so honour the OS setting: land on the new geometry immediately.
+     This also drops the mobile drawer's slide, which is the same request. */
+  @media (prefers-reduced-motion: reduce) {
+    .at-sidebar,
+    .at-shell,
+    .at-header {
+      transition: none;
+    }
+  }
+
+  /* ── §8 Page head — spec 03 §9.2 ── */
+  .at-page-head {
+    margin-block-end: var(--at-space-6);
+  }
+  .at-page-head__row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--at-space-4);
+    flex-wrap: wrap;
+  }
+  .at-page-head__title {
+    font-family: var(--at-font-display);
+    font-size: var(--at-text-2xl);
+    font-weight: var(--at-weight-2xl);
+    letter-spacing: var(--at-tracking-2xl);
+    color: var(--at-text-strong);
+    margin-block: var(--at-space-1) 0;
+  }
+  /* The deck, not fine print. This answers a 32px title, so it sits one step
+     ABOVE body copy — at sm it rendered 13px of grey under a 32px headline and
+     the two read as unrelated blocks rather than a title and its standfirst.
+     See the "md is the DECK" note in _primitives.css. */
+  .at-page-head__subtitle {
+    color: var(--at-text-muted);
+    font-size: var(--at-text-md);
+    line-height: var(--at-leading-md);
+    margin-block-start: var(--at-space-1);
+  }
+  .at-page-head__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--at-space-2);
+    flex-wrap: wrap;
+  }
+
+  /* ── §9 Page styles — spec 03 §9.1 ── */
+  [data-at-page='classic'] .at-main {
+    background: var(--at-surface-subtle);
+  }
+  [data-at-page='modern'] .at-main {
+    padding-block-start: var(--at-space-8);
+  }
+
+  /* ── §10 Standalone (auth/error) — spec 03 archetype 8 ── */
+  body.at-standalone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--at-space-6);
+    min-height: 100vh;
+  }
+  body.at-standalone .at-shell,
+  body.at-standalone .at-sidebar,
+  body.at-standalone .at-header,
+  body.at-standalone .at-footer {
+    display: none;
+  }
+
+  /* ── §11 Fullscreen standalone app — chrome-less app workspaces ──
+     The 10 app pages (email, chat, calendar, …) render without the admin
+     shell. A thin brand bar (at-appbar) caps a viewport-filling workspace
+     (at-app-main) so multi-pane layouts (3-pane mail, chat) occupy full
+     height instead of the centered card used by auth/error (§10). */
+  body.at-app-fullscreen {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh; /* mobile address-bar friendly */
+    overflow: hidden;
+  }
+  .at-appbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--at-space-3);
+    flex: 0 0 auto;
+    height: var(--at-header-h);
+    padding-inline: var(--at-space-5);
+    background: var(--at-surface);
+    border-block-end: var(--at-border-w) solid var(--at-border);
+  }
+  .at-appbar__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--at-space-2);
+    font-family: var(--at-font-display);
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--at-text);
+  }
+  /* The brand is a link to the app root, so it has to opt OUT of link colour
+     rather than simply not opt in: `a:hover` (0,1,1) above out-specifies
+     .at-appbar__brand (0,1,0), so deleting this rule would hand the wordmark
+     --at-link-hover instead of leaving it alone. Repeating the resting colour
+     at (0,2,0) is what actually holds it still.
+
+     A logo is a fixed mark: the plate and the wordmark are the same two colours
+     on every page and in every state, which is the whole point of freezing the
+     stamp's pair in nav.css. Recolouring the word on hover broke that — the
+     mark beside it could not follow, so the lockup came apart on hover. The
+     pointer cursor is the affordance. */
+  .at-appbar__brand:hover {
+    color: var(--at-text);
+  }
+  /* The appbar is a fixed-height strip inside an overflow:hidden body, so it
+     must stay on one line — its cluster carries .at-cluster--nowrap in the
+     markup for that. Here we only tighten the gutter at phone widths; the
+     rule that sheds the secondary action lives in shell.css, because hiding
+     a .at-btn needs to win inside the components layer. */
+  @media (max-width: 768px) {
+    .at-appbar {
+      padding-inline: var(--at-space-3);
+      gap: var(--at-space-2);
+    }
+  }
+
+  .at-app-main {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    padding: var(--at-space-4);
+  }
+
+  /* ── §12 Loader ── */
+  .at-loader {
+    position: fixed;
+    inset: 0;
+    z-index: var(--at-z-customizer);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--at-canvas);
+    transition: opacity var(--at-motion-slow) var(--at-ease-standard);
+  }
+  .at-loader.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .at-loader__stamp {
+    width: 48px;
+    height: 48px;
+    background: var(--at-accent);
+    border: var(--at-border-w) solid var(--at-ink);
+    box-shadow: var(--at-shadow-4);
+    animation: at-loader-press 0.9s var(--at-ease-emphasized) infinite;
+  }
+  @keyframes at-loader-press {
+    0%,
+    100% {
+      transform: translate(0, 0);
+      box-shadow: var(--at-shadow-4);
+    }
+    50% {
+      transform: translate(4px, 4px);
+      box-shadow: var(--at-shadow-press);
+    }
+  }
+
+  /* ── §12 Backdrop (drawer/modal) ──
+   Hidden by opacity + pointer-events, never by `display`. The pair already
+   leaves the scrim invisible AND inert, and unlike display it is something the
+   browser can transition: an element coming out of display:none has no
+   before-change style to interpolate from, so it paints straight at its final
+   opacity, and one put back into display:none stops rendering before the fade
+   gets a frame. Nothing may set display on this element — the drawer used to,
+   and neither direction animated. See js/core/sidebar.js.
+
+   --at-motion-slow, not the base tier: the scrim is part of the drawer gesture
+   and .at-sidebar slides on slow (see its transition above). Matching lands the
+   panel and the dark behind it on the same frame instead of finishing the fade
+   80ms early. */
+  .at-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--at-z-overlay-backdrop);
+    background: var(--at-overlay-backdrop);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--at-motion-slow) var(--at-ease-standard);
+  }
+  .at-backdrop.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  /* One scrim, two owners. The theme customizer (shell.css) raises this same
+     element rather than shipping a second overlay — two fixed full-screen
+     tints would have to be kept in step on z-index, tint and duration forever.
+     Deliberately OUTSIDE §13's max-width media query: the drawer is a mobile
+     affordance, the customizer opens at every width. z-order still works out —
+     --at-z-customizer (1500) is far above --at-z-overlay-backdrop (900), so the
+     panel stays lit while everything behind it dims. The body class is written
+     by the customizer, which also makes this element the click-to-close
+     target. */
+  body.at-customizer-open .at-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* ── §13 Responsive — spec 03 §11.2 ── */
+  @media (max-width: 992px) {
+    /* auto-collapse to compact rail on tablet unless pinned */
+    .at-sidebar {
+      transform: translateX(-100%);
+    }
+    [dir='rtl'] .at-sidebar {
+      transform: translateX(100%);
+    }
+    .at-shell,
+    .at-header {
+      margin-inline-start: 0;
+      inset-inline-start: 0;
+    }
+    /* drawer open */
+    body.at-sidebar-open .at-sidebar {
+      transform: translateX(0);
+      /* lift above the backdrop so the drawer stays clickable (backdrop is
+       --at-z-overlay-backdrop: 900, sidebar is only 300 by default). */
+      z-index: var(--at-z-drawer);
+    }
+    body.at-sidebar-open .at-backdrop {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .at-main {
+      padding: var(--at-space-4);
+    }
+    /* The page title is 2xl (32px) on desktop, which is the anchor the whole
+       hierarchy hangs off. At 375px that same 32px eats two lines for any
+       title longer than one word ("Create Project", "Order Details") and the
+       head block starts pushing content below the fold. Step it to xl: still
+       the loudest thing on the screen against a 15px body, but it fits on one
+       line at the narrowest breakpoint the shell supports. */
+    .at-page-head__title {
+      font-size: var(--at-text-xl);
+      line-height: var(--at-leading-xl);
+    }
+    /* The deck steps down with its title so the pair keeps its proportion —
+       md under a 24px heading is nearly the same size and the contrast dies. */
+    .at-page-head__subtitle {
+      font-size: var(--at-text-base);
+      line-height: var(--at-leading-base);
+    }
+    .at-page-head__row {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .at-page-head__actions {
+      width: 100%;
+    }
+    .at-page-head__actions .at-btn {
+      flex: 1;
+    }
+  }
+
+  /* ── §14 x-cloak — honoured for markup carried over from other stacks ── */
+  [x-cloak] {
+    display: none !important;
+  }
+} /* end @layer base */

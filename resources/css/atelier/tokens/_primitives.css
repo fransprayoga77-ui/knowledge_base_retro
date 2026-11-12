@@ -1,0 +1,324 @@
+/* ════════════════════════════════════════════════════════════════════════
+   _primitives.css — Layer 1: literal scales + ink/shadow system + ramps
+   Bold Press design language · spec 01-DESIGN-SYSTEM.md is law
+   ────────────────────────────────────────────────────────────────────────
+   Mode-agnostic literal scales on :root. Components never read these — they
+   consume Layer 2 role tokens (_roles.css). The only blocks that carry a dark
+   override here are the semantic ramps (success/warning/danger/info) and the
+   shadows, because their literal values shift between light and dark.
+   ════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Spacing (4px base) — spec 01 §5.1 ── */
+  --at-space-0: 0;
+  --at-space-1: 4px;
+  --at-space-2: 8px;
+  --at-space-3: 12px;
+  --at-space-4: 16px;
+  --at-space-5: 20px;
+  --at-space-6: 24px;
+  --at-space-7: 28px;
+  --at-space-8: 32px;
+  --at-space-10: 40px;
+  --at-space-12: 48px;
+  --at-space-16: 64px;
+  --at-space-20: 80px;
+
+  /* ── Corner radius — Bold Press sharp geometry, spec 01 §6 ── */
+  --at-radius-none: 0;
+  --at-radius-xs: 2px; /* badges, tags, checkboxes */
+  --at-radius-sm: 4px; /* inputs, buttons, dropdown items */
+  --at-radius-md: 6px; /* CARDS default, popovers, small panels */
+  --at-radius-lg: 8px; /* large cards, media tiles, modals */
+  --at-radius-xl: 12px; /* customizer panel, large feature cards (rare) */
+  --at-radius-pill: 999px; /* true pills, status dots, avatars, toggles only */
+
+  /* ── Border widths — spec 01 §7.1 ── */
+  --at-border-w-sm: 1.5px; /* dense: table cells, small badges */
+  --at-border-w: 2px; /* DEFAULT on cards, inputs, badges, nav items */
+  --at-border-w-lg: 2.5px; /* hero/feature cards, page-level emphasis */
+
+  /* ── Pressable-control border widths — .at-btn, .at-icon-btn, .at-menu-toggle,
+     .at-search, .at-user, .at-apps-grid__item.
+     These were asymmetric (1.5 top / 2 sides / 4 bottom) for a weighted-bottom
+     "grounded block" read. They are now uniform 2px on all four sides: the hard
+     offset shadow alone carries the grounding, and an even rim keeps the frame
+     reading as one printed impression rather than a shape with a heavy lip.
+     The three names are kept — every site still addresses its own edge, so
+     re-weighting later is a one-file change. ── */
+  --at-border-w-top: 2px; /* top-left + top-right */
+  --at-border-w-side: 2px; /* left + right */
+  --at-border-w-bottom: 2px; /* bottom-left + bottom-right */
+
+  /* ── Hard offset shadows (zero blur) — spec 01 §7.2. The heart of Bold Press. ──
+     Every shadow is a solid offset block, printed in --at-ink by default.
+     --at-ink is defined in _roles.css (it is per-preset), so this references it
+     late-bound.
+
+     Ink is only right while the element is lighter than ink. Fill an element
+     *with* ink and the offset block stops being a shadow and becomes a stepped
+     edge — the block and its shadow fuse into one lopsided silhouette, and the
+     press reads as shrinking rather than landing. .at-btn--dark was doing
+     exactly that.
+
+     So the offset is also published on its own, to be composed with a colour at
+     the use site: `var(--at-shadow-off-3) var(--at-shadow-color)`. It has to be
+     composed there, not here — a var() inside a custom property is substituted
+     on the element that *declares* it, so --at-shadow-3 is already a literal by
+     the time anything inherits it, and re-pointing --at-shadow-color downstream
+     would do nothing. Composed at the use site, --at-shadow-color is a real
+     per-element knob (see .at-btn in components.css §1). */
+  --at-shadow-color: var(--at-ink);
+  --at-shadow-off-2: 2px 2px 0;
+  --at-shadow-off-3: 3px 3px 0;
+  --at-shadow-off-4: 4px 4px 0;
+  --at-shadow-off-6: 6px 6px 0;
+
+  --at-shadow-none: none;
+  --at-shadow-2: 2px 2px 0 var(--at-ink); /* badges, chips, small buttons */
+  --at-shadow-3: 3px 3px 0 var(--at-ink); /* default cards, buttons, inputs */
+  --at-shadow-4: 4px 4px 0 var(--at-ink); /* raised cards, hover */
+  --at-shadow-6: 6px 6px 0 var(--at-ink); /* modals, popovers, feature cards */
+  --at-shadow-card: 4px 4px 0 var(--at-ink); /* default card elevation (alias of -4) */
+  --at-shadow-press: none; /* the pressed/active state — shadow flattened */
+
+  /* ── The counter-print — the focus mark on pressable controls. spec 01 §12;
+     the recipe and the reasoning are in tokens/_recipes.css. ──
+     The block is struck a second time, out of register the opposite way from
+     the offset block, so the two impressions bracket the control instead of
+     colliding with it.
+
+     Published as an offset alone for the same reason as --at-shadow-off-*: the
+     colour is composed at the use site, from --at-focus-ring. A control that
+     rests on a shallower block re-declares this to match, so the two strikes
+     stay in register (see .at-icon-btn, components.css §1).
+
+     --at-shadow-focus is the layer that carries it. It sits in the shadow list
+     of everything that prints and is inert until :focus-visible swaps it —
+     zero offset, zero blur, zero spread, and an outer shadow is clipped by its
+     own border box, so the resting layer paints nothing at all. Transparent
+     rather than the implied currentColor so the 100ms shadow transition has
+     nothing to interpolate a colour from.
+
+     _recipes.css also registers this with @property { inherits: false } — a
+     focused control must not hand its print down to a shadow-bearing
+     descendant. This declaration is the fallback for engines without
+     @property, where the property stays inherited and this is what it
+     inherits. */
+  --at-focus-print: -3px -3px 0;
+  --at-shadow-focus: 0 0 0 0 transparent;
+
+  /* ── Type scale — spec 01 §4.2 ──
+     Two regimes, plus two hard floors.
+
+     THE FLOORS (review feedback, 2026-09-01). Nothing in the template renders
+     below 12px, and nothing that reads as a PARAGRAPH renders below 14px. That
+     is why the bottom of the scale is 12/13/14 and not the old 11/12/13: the
+     cluster was raised as a block rather than clamped at one end, so the three
+     densities stay one pixel apart and keep their relative order. 2xs is the
+     floor itself — eyebrows, chart axis ticks, swatch labels. sm is the
+     paragraph floor, so any supporting copy may sit there safely.
+
+     2xs/xs/sm (12/13/14) are the DENSE CLUSTER: caps eyebrows, chart axes,
+     table cells, badge text. They sit one pixel apart because they are not a
+     hierarchy — they are one register at three densities, and every step here
+     costs table width.
+
+     base and up are the HIERARCHY, and they step ~1.15-1.2 so adjacent levels
+     are actually telling apart at a glance. They used to be 14/15/18/22/28 —
+     base to md was a 7% step, which is below the threshold where a reader
+     registers a size change at all, so h4 read as body text and the whole
+     ladder collapsed into "everything is 14px".
+
+     md is the DECK. It is the one level that exists purely to sit between a
+     heading and its body copy: a page-head subtitle, a card's supporting line.
+     Before the review those all sat at sm, two full steps under body text, so
+     a 32px title was answered by 13px of grey and the pair read as unrelated.
+     A deck belongs just ABOVE the paragraph it introduces, never below it.
+
+     THE DECK LADDER — a heading's supporting line steps with the heading, so
+     the pair keeps one proportion everywhere in the template:
+
+         heading 4xl/3xl/2xl (52/40/32) -> deck md   (17)
+         heading xl          (24)       -> deck base (15)
+         heading lg          (20)       -> deck sm   (14)
+
+     It converges on the paragraph floor rather than crossing it: the smallest
+     deck in the system is still a legal paragraph. The error pages already did
+     this (4xl over md); .at-page-head__subtitle and .at-auth__sub were the
+     outliers, and the mobile page head steps title AND deck together.
+
+     Leading is a literal, not a ratio: it stays on the 2px grid so a stack of
+     mixed sizes still lands on a predictable rhythm. */
+  --at-text-2xs: 12px;
+  --at-leading-2xs: 16px;
+  --at-weight-2xs: 600;
+  --at-tracking-2xs: 0.06em;
+
+  --at-text-xs: 13px;
+  --at-leading-xs: 18px;
+  --at-weight-xs: 500;
+
+  --at-text-sm: 14px;
+  --at-leading-sm: 20px;
+  --at-weight-sm: 500;
+
+  --at-text-base: 15px;
+  --at-leading-base: 24px;
+  --at-weight-base: 400;
+
+  --at-text-md: 17px;
+  --at-leading-md: 26px;
+  --at-weight-md: 400;
+
+  --at-text-lg: 20px;
+  --at-leading-lg: 28px;
+  --at-weight-lg: 600;
+
+  --at-text-xl: 24px;
+  --at-leading-xl: 32px;
+  --at-weight-xl: 700;
+  --at-tracking-xl: -0.01em;
+
+  --at-text-2xl: 32px;
+  --at-leading-2xl: 38px;
+  --at-weight-2xl: 700;
+  --at-tracking-2xl: -0.02em;
+
+  --at-text-3xl: 40px;
+  --at-leading-3xl: 44px;
+  --at-weight-3xl: 800;
+  --at-tracking-3xl: -0.02em;
+
+  --at-text-4xl: 52px;
+  --at-leading-4xl: 56px;
+  --at-weight-4xl: 800;
+  --at-tracking-4xl: -0.03em;
+
+  --at-num-kpi: 34px;
+  --at-leading-kpi: 38px;
+  --at-weight-kpi: 700;
+  --at-tracking-kpi: -0.02em;
+
+  /* ── Weights — spec 01 §4.3 ── */
+  --at-weight-regular: 400;
+  --at-weight-medium: 500;
+  --at-weight-semibold: 600;
+  --at-weight-bold: 700;
+  --at-weight-extrabold: 800;
+
+  /* ── Control heights — spec 01 §5.2 ── */
+  --at-control-sm: 32px;
+  --at-control-md: 38px;
+  --at-control-lg: 44px;
+
+  /* ── Icon sizes & stroke — spec 01 §8 ── */
+  --at-icon-xs: 14px;
+  --at-icon-sm: 16px;
+  --at-icon-md: 20px;
+  --at-icon-lg: 24px;
+  --at-icon-xl: 32px;
+  --at-icon-stroke: 2px; /* heavier than the 1.75px hairline norm — Bold Press is louder */
+
+  /* ── Z-index tiers — spec 01 §14.3 ── */
+  --at-z-base: 0;
+  --at-z-sticky: 100;
+  --at-z-header: 200;
+  --at-z-sidebar: 300;
+  --at-z-overlay-backdrop: 900;
+  --at-z-dropdown: 1000;
+  --at-z-drawer: 1100;
+  --at-z-modal: 1200;
+  --at-z-toast: 1300;
+  --at-z-command: 1400;
+  --at-z-customizer: 1500;
+
+  /* ── Motion — spec 01 §11 ──
+     The interaction tier was doubled from 80/140: at 80ms a button's lift and
+     its shadow resolved inside a few frames, which read as a state swap rather
+     than as a movement — the press landed before the eye could follow it out.
+
+     The upper tiers went up with it, but by less. They are not answering a
+     cursor, they are moving layout: --at-motion-slow drives the sidebar
+     collapse and the drawer slides, and a true doubling put those at 560ms,
+     well past the point where chrome stops feeling responsive. They are lifted
+     only as far as the ordering requires, which is what keeps the five steps a
+     scale — a hover must never take as long as the drawer it sits next to.
+
+     --at-motion-deliberate has no uses; it is kept so the scale stays complete
+     for anyone extending the template. */
+  --at-motion-instant: 160ms; /* press */
+  --at-motion-fast: 280ms; /* hover, focus */
+  --at-motion-base: 360ms; /* default */
+  --at-motion-slow: 480ms; /* drawer, panel */
+  --at-motion-deliberate: 640ms; /* modal, page */
+
+  --at-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --at-ease-emphasized: cubic-bezier(0.2, 0, 0, 1.05); /* slight overshoot for press */
+  --at-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --at-ease-linear: linear;
+
+  /* ── Breakpoints — spec 01 §5.4 ── */
+  --at-bp-xs: 0;
+  --at-bp-sm: 576px;
+  --at-bp-md: 768px;
+  --at-bp-lg: 992px;
+  --at-bp-xl: 1200px;
+  --at-bp-2xl: 1400px;
+
+  /* ── Shell geometry — spec 01 §5.3 (consumed by 03-APP-SHELL) ── */
+  --at-sidebar-w: 256px;
+  --at-sidebar-w-compact: 72px;
+  --at-header-h: 64px;
+  --at-footer-h: 50px;
+  --at-container-boxed: 1320px;
+
+  /* ── Focus keyline — spec 01 §12 ──
+     The trim keyline, worn by everything that is not a pressable block: inline
+     links, bare tabbable regions, third-party widgets. The pressable controls
+     take the counter-print above instead. It matches the default border weight,
+     so a focused element reads as the same rule printed twice with a gap
+     between — not as a fatter band wrapped around it. It was 3px back when the
+     ring was an accent spread shadow that needed the extra mass to be seen. */
+  --at-focus-ring-width: var(--at-border-w); /* 2px */
+  --at-focus-ring-offset: 2px; /* the gap; shows the ground through */
+
+  /* ── Overlay backdrop ── */
+  --at-overlay-backdrop: rgba(46, 35, 23, 0.5); /* ink-hued scrim; overridden in dark */
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   Semantic ramps — light literals here; dark remap below.
+   The base -500 value is per-preset (set in _themes.css), so only the -50
+   (tint bg) and -200 (border) stops are fixed globally here. The -500 base
+   is aliased in _roles.css to the active preset's value.
+   ════════════════════════════════════════════════════════════════════════ */
+:root {
+  /* success (up) */
+  --at-success-50: #eaf3e0;
+  --at-success-200: #c4dcaf;
+  /* warning */
+  --at-warning-50: #f7eed4;
+  --at-warning-200: #ecd9a6;
+  /* danger (down) */
+  --at-danger-50: #f6e0d8;
+  --at-danger-200: #e8bca9;
+  /* info */
+  --at-info-50: #e2e8f0;
+  --at-info-200: #bcc8dc;
+}
+
+[data-at-theme='dark'] {
+  /* darker tints for dark mode */
+  --at-success-50: #1c2a1a;
+  --at-success-200: #2f4a2a;
+  --at-warning-50: #2a2214;
+  --at-warning-200: #4d3d1a;
+  --at-danger-50: #2a1814;
+  --at-danger-200: #4d2a20;
+  --at-info-50: #161e2a;
+  --at-info-200: #283548;
+
+  /* overlay backdrop darker in dark mode */
+  --at-overlay-backdrop: rgba(0, 0, 0, 0.6);
+}

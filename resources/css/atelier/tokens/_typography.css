@@ -1,0 +1,161 @@
+/* ════════════════════════════════════════════════════════════════════════
+   _typography.css — Layer 3b: the 12 typography sets
+   ────────────────────────────────────────────────────────────────────────
+   Typography is its OWN axis. It used to be welded to colour: picking
+   "Electric" in the customizer bought you Electric's pink AND Archivo +
+   Instrument Sans, with no way to take one without the other. A buyer who
+   liked the Lagoon palette but wanted the editorial serif had to fork the
+   CSS. The two axes are now independent — 12 colour schemes x 12 type sets,
+   144 combinations, all switchable at runtime with no rebuild.
+
+   Selecting a set writes data-at-type-preset="<name>" on <html>. The default
+   Atelier set writes NO attribute — its two families are inline on :root in
+   _roles.css, exactly as the Atelier colours are. Choosing it in the
+   customizer REMOVES the attribute and its storage key, same convention the
+   colour axis uses (see _themes.css).
+
+   ── WHY THIS IS A SEPARATE FILE, LOADED LAST ────────────────────────────
+   A block here is [data-at-type-preset='x'] — (0,1,0), the same specificity
+   as the :root defaults in _roles.css and as every colour block in
+   _themes.css. Ties break on source order, so this file must be imported
+   AFTER both to win. app.css does that.
+
+   Specificity is only half of it: _themes.css no longer declares a font
+   token at all. That is the actual guarantee that the axes can't fight —
+   not the load order. If you ever add a --at-font-* to a colour preset you
+   silently re-couple them, and only for that one preset. Don't.
+
+   ── NO DARK VARIANTS, ON PURPOSE ────────────────────────────────────────
+   Every colour preset in _themes.css restates its full on-* family in its
+   dark block, because a light block and the shared [data-at-theme='dark']
+   block are both (0,1,0) and the light one loads later — see the two
+   contracts at the top of _roles.css. Type has no such hazard: nothing in
+   the system sets a --at-font-* under a dark selector, so one declaration
+   per set covers both modes. (The old coupled blocks restated the pair in
+   dark for six of the presets; that was redundant even then.)
+
+   ── SET NAMES ───────────────────────────────────────────────────────────
+   The sets keep the preset names because each pair was drawn for that
+   world's palette — Antonio was chosen against kraft board, Playfair against
+   lacquer. They are defaults that read well together, not a constraint: any
+   set composes with any scheme now.
+
+   ── WEIGHTS ARE NOT DECORATION ──────────────────────────────────────────
+   --at-font-display is NOT a headline-only token. It is consumed at 600, 700
+   and 800 (components.css 426/587/797/930, base.css 357, nav.css 38) and
+   rendered as small as 11px in the sidebar label. A display face that ships
+   one weight gets synthetically bolded at two of those three sizes, and a
+   smeared condensed black face is exactly what the letterpress idiom cannot
+   absorb. Body faces need 400/500/600/700. Every family below is variable
+   and drawn across its requested range except the two noted in head.html
+   (Antonio and Zilla Slab genuinely have no 800). Check any replacement at
+   11px before shipping it — see the Antonio and Saira notes.
+
+   The mono is NOT part of this axis: JetBrains Mono is constant across all
+   twelve and lives on :root in _roles.css.
+
+   Families and weights are requested in ONE Google Fonts href in
+   partials/head.html, so switching sets never triggers a font load.
+   Table of all twelve pairs: spec 01 §4.1.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* 1. ELECTRIC — poster grotesque */
+[data-at-type-preset='electric'] {
+  /* Archivo, not Archivo Black. Same grotesque skeleton — Black is a cut of
+     this family — but Archivo Black ships as ONE weight, and this token is
+     consumed at 600, 700 and 800 (see the head.html note), so two of the three
+     were the browser faking a 900 back down. Archivo is variable 100-900:
+     every site now gets a drawn weight and the poster voice is unchanged. */
+  --at-font-display: 'Archivo', 'Arial Black', sans-serif;
+  /* Instrument Sans, not Space Grotesk. Tight and slightly mechanical, so the
+     Electric register holds, but it serves a real 400 for body copy — the
+     Space Grotesk request started at 500 and pulled --at-text-base up with it. */
+  --at-font-sans: 'Instrument Sans', system-ui, sans-serif;
+}
+
+/* 2. SAGE — humanist display over a geometric body */
+[data-at-type-preset='sage'] {
+  --at-font-display: 'Bricolage Grotesque', system-ui, sans-serif;
+  --at-font-sans: 'Manrope', system-ui, sans-serif;
+}
+
+/* 3. VIOLET — soft-tech geometric */
+[data-at-type-preset='violet'] {
+  --at-font-display: 'Sora', system-ui, sans-serif;
+  --at-font-sans: 'Manrope', system-ui, sans-serif;
+}
+
+/* 4. LAGOON — rounded geometric, the friendliest of the twelve */
+[data-at-type-preset='lagoon'] {
+  --at-font-display: 'Outfit', system-ui, sans-serif;
+  --at-font-sans: 'Figtree', system-ui, sans-serif;
+}
+
+/* 5. FOUNDRY — engineering grotesque */
+[data-at-type-preset='foundry'] {
+  /* Saira, not Syne. Syne is an experimental display face with a widening
+     lower ramp — it goes soft at the 11px sidebar label this token is also
+     rendered at, which is the wrong failure for a set called Foundry.
+     Saira is a semi-condensed engineering grotesque, variable 100-900 with a
+     width axis: utilitarian rather than expressive, and it stays legible all
+     the way down. Semi-condensed also buys back the horizontal room the
+     industrial nav labels wanted. */
+  --at-font-display: 'Saira', system-ui, sans-serif;
+  /* Figtree was shared with Lagoon, so two of six sets had one voice. IBM
+     Plex Sans is the most genuinely industrial body sans available — drawn for
+     IBM on a rationalist squared skeleton, the same engineered logic as the
+     JetBrains Mono it sits beside (.at-num routes 823 of the 1291 table cells
+     to the mono, so the body face shares every table row with it). Its digits
+     are tabular by default, so unmarked number columns align with no
+     font-variant-numeric. (Archivo was the first pick here and was rejected.) */
+  --at-font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+}
+
+/* 6. STENCIL — condensed industrial */
+[data-at-type-preset='stencil'] {
+  /* Antonio, not Anton. Anton ships a single 400, so all three of this
+     token's weights would be synthetically bolded — see the weights note
+     above. Antonio is the same condensed industrial silhouette on a real
+     100-700 axis. It has no 800, which is one of the two known clamps. */
+  --at-font-display: 'Antonio', 'Arial Narrow', sans-serif;
+  --at-font-sans: 'Public Sans', system-ui, sans-serif;
+}
+
+/* 7. GANTRY — squared machine plate */
+[data-at-type-preset='gantry'] {
+  /* Oxanium, not Chakra Petch. Same squared, chamfered machine-plate voice and
+     the same rationalist skeleton it shares with the JetBrains Mono in every
+     table row, but Oxanium is variable 200-800, so the 800 sites are drawn
+     instead of clamping to Chakra Petch's 700 ceiling. The one thing to watch
+     is 11px: the bowls are flattened, and that is where they could close up. */
+  --at-font-display: 'Oxanium', system-ui, sans-serif;
+  --at-font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+}
+
+/* 8. LACQUER — high-contrast didone over a neutral geometric */
+[data-at-type-preset='lacquer'] {
+  --at-font-display: 'Playfair Display', Georgia, serif;
+  --at-font-sans: 'DM Sans', system-ui, sans-serif;
+}
+
+/* 9. NOCTURNE — grotesque pair, the most neutral of the twelve */
+[data-at-type-preset='nocturne'] {
+  --at-font-display: 'Chivo', system-ui, sans-serif;
+  --at-font-sans: 'Mulish', system-ui, sans-serif;
+}
+
+/* 10. PRIMER — slab serif over a civic sans */
+[data-at-type-preset='primer'] {
+  /* Zilla Slab tops out at 700 — the other known 800 clamp. */
+  --at-font-display: 'Zilla Slab', Georgia, serif;
+  --at-font-sans: 'Public Sans', system-ui, sans-serif;
+}
+
+/* 11. SORBET — rounded display over a humanist body */
+[data-at-type-preset='sorbet'] {
+  --at-font-display: 'Gabarito', system-ui, sans-serif;
+  --at-font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+/* 12. ATELIER (default) — Fraunces + Libre Franklin.
+   No block: it is inline on :root in _roles.css and writes no attribute. */

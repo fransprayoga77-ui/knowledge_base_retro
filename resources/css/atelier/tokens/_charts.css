@@ -1,0 +1,413 @@
+/* ════════════════════════════════════════════════════════════════════════
+   _charts.css — Layer 3b: data-viz palette + chart chrome — spec 01 §10
+   ────────────────────────────────────────────────────────────────────────
+   A 6-step categorical palette per preset, authored per mode.
+
+   These are literal values, not aliases of the role tokens. The role tokens
+   are a UI palette: only four of them are distinct hues, --at-info aliases
+   --at-tertiary, and --at-muted is a text grey — so aliasing them gave a
+   "6-colour" chart palette in which slots 3 and 5 were the SAME colour and
+   slot 6 read as grey. Every slot here is instead stepped into a common
+   lightness band with a chroma floor, so no series dominates by weight and
+   every adjacent pair stays separable — including for red-green colour
+   blindness, which the accent+secondary pairing used to fail outright.
+
+   Each palette is checked against the surface it is drawn on: OKLCH lightness
+   band, chroma floor, adjacent-pair ΔE under protanopia/deuteranopia/normal
+   vision, and WCAG contrast. Slot 1 stays the preset's accent hue so series-1
+   still reads as the brand; slots 5-6 are supporting hues placed in the gaps
+   of the preset's own hue circle, held clear of the reserved status reds.
+
+   Chart chrome (grid, axis line, track) is a tint of the preset ink over its
+   surface — the grid must sit UNDER the data, never compete with it.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ══ Atelier (default preset — no data-at-theme-preset attribute) ══ */
+:root {
+  --at-chart-1: #de7a6c;
+  --at-chart-2: #3d6102;
+  --at-chart-3: #cd9b32;
+  --at-chart-4: #9278ed;
+  --at-chart-5: #c44a82;
+  --at-chart-6: #898d1a;
+
+  --at-chart-grid: #e6e5e3;
+  --at-chart-axis-line: #c0bdb9;
+  --at-chart-track: #f0f0ef;
+}
+
+[data-at-theme='dark'] {
+  --at-chart-1: #ce7163;
+  --at-chart-2: #287600;
+  --at-chart-3: #bc8800;
+  --at-chart-4: #b43774;
+  --at-chart-5: #866ce0;
+  --at-chart-6: #7c8017;
+
+  --at-chart-grid: #3a3129;
+  --at-chart-axis-line: #5d554a;
+  --at-chart-track: #302820;
+}
+
+/* ══ Electric ══ */
+[data-at-theme-preset='electric'] {
+  --at-chart-1: #ea669a;
+  --at-chart-2: #9abf2c;
+  --at-chart-3: #4160cc;
+  --at-chart-4: #039fc9;
+  --at-chart-5: #703a86;
+  --at-chart-6: #c29300;
+
+  --at-chart-grid: #e2e2e2;
+  --at-chart-axis-line: #b6b6b6;
+  --at-chart-track: #eeeeee;
+}
+
+[data-at-theme='dark'][data-at-theme-preset='electric'] {
+  --at-chart-1: #db5c97;
+  --at-chart-2: #74a101;
+  --at-chart-3: #7184f3;
+  --at-chart-4: #00865b;
+  --at-chart-5: #019dca;
+  --at-chart-6: #9a7902;
+
+  --at-chart-grid: #2f2f31;
+  --at-chart-axis-line: #555556;
+  --at-chart-track: #252527;
+}
+
+/* ══ Sage ══ */
+[data-at-theme-preset='sage'] {
+  --at-chart-1: #cf745c;
+  --at-chart-2: #386d23;
+  --at-chart-3: #c69500;
+  --at-chart-4: #9e77ec;
+  --at-chart-5: #a8265d;
+  --at-chart-6: #93c04e;
+
+  --at-chart-grid: #e4e5e4;
+  --at-chart-axis-line: #bcbfbc;
+  --at-chart-track: #eff0ef;
+}
+
+[data-at-theme='dark'][data-at-theme-preset='sage'] {
+  --at-chart-1: #bf430b;
+  --at-chart-2: #357938;
+  --at-chart-3: #bb8400;
+  --at-chart-4: #3c8cf0;
+  --at-chart-5: #8d57ac;
+  --at-chart-6: #739f4e;
+
+  --at-chart-grid: #313a30;
+  --at-chart-axis-line: #535c51;
+  --at-chart-track: #273027;
+}
+
+/* ══ Violet ══ */
+[data-at-theme-preset='violet'] {
+  --at-chart-1: #755bce;
+  --at-chart-2: #ee9907;
+  --at-chart-3: #693a91;
+  --at-chart-4: #ca4e79;
+  --at-chart-5: #0f85bd;
+  --at-chart-6: #93bf60;
+
+  --at-chart-grid: #e5e4e8;
+  --at-chart-axis-line: #bfbcc5;
+  --at-chart-track: #f0eff1;
+}
+
+[data-at-theme='dark'][data-at-theme-preset='violet'] {
+  --at-chart-1: #9876ec;
+  --at-chart-2: #a67205;
+  --at-chart-3: #895aa8;
+  --at-chart-4: #06a686;
+  --at-chart-5: #b34a65;
+  --at-chart-6: #859c0d;
+
+  --at-chart-grid: #362e4e;
+  --at-chart-axis-line: #58506f;
+  --at-chart-track: #2c2545;
+}
+
+/* ══ Lagoon ══ */
+[data-at-theme-preset='lagoon'] {
+  --at-chart-1: #04bdb2;
+  --at-chart-2: #9abf2b;
+  --at-chart-3: #0098bd;
+  --at-chart-4: #c29203;
+  --at-chart-5: #7f83f8;
+  --at-chart-6: #a63480;
+
+  --at-chart-grid: #e2e5e6;
+  --at-chart-axis-line: #b6bec1;
+  --at-chart-track: #eef0f1;
+}
+
+[data-at-theme='dark'][data-at-theme-preset='lagoon'] {
+  --at-chart-1: #00968b;
+  --at-chart-2: #7f9e01;
+  --at-chart-3: #00a0c2;
+  --at-chart-4: #a27506;
+  --at-chart-5: #c33e61;
+  --at-chart-6: #a15dc9;
+
+  --at-chart-grid: #273a40;
+  --at-chart-axis-line: #495c62;
+  --at-chart-track: #1d3036;
+}
+
+/* ══ Foundry ══ */
+[data-at-theme-preset='foundry'] {
+  --at-chart-1: #d75927;
+  --at-chart-2: #e89d00;
+  --at-chart-3: #9e4b28;
+  --at-chart-4: #a0bb60;
+  --at-chart-5: #008d60;
+  --at-chart-6: #0086e0;
+
+  --at-chart-grid: #e6e4e3;
+  --at-chart-axis-line: #bfbcb9;
+  --at-chart-track: #f0efef;
+}
+
+[data-at-theme='dark'][data-at-theme-preset='foundry'] {
+  --at-chart-1: #cb500e;
+  --at-chart-2: #a88f00;
+  --at-chart-3: #994332;
+  --at-chart-4: #6a852b;
+  --at-chart-5: #7b56a4;
+  --at-chart-6: #0990c3;
+
+  --at-chart-grid: #3a2f23;
+  --at-chart-axis-line: #5d5042;
+  --at-chart-track: #30251a;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   The six later presets — stencil · gantry · lacquer · nocturne · primer ·
+   sorbet. Searched rather than picked: slot 1 is pinned to the preset's accent
+   hue so series 1 reads as the brand, then slots 2-6 maximise the worst pair
+   measured three ways — normal vision, protanopia and deuteranopia.
+   Thresholds are the floors measured off the six palettes above (normal dE
+   18.7, CVD-adjacent 9.2, CVD any-pair 6.0); the worst of these twelve is
+   34.3 / 52.1 / 10.4. Chroma is bounded — unbounded, every preset converges on
+   the same gamut corners and the palette stops belonging to its theme. Hues in
+   the reserved status-red band are penalised so no data series reads as an
+   alert. Grid, axis and track are tints of the preset's --at-ink-strong over
+   its own surface, which is why retuning --at-ink never disturbs them.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ══ Stencil ══ */
+/* light — worst pair dE 44.1, adjacent under CVD 57.7, any pair under CVD 15.8, L* spread 30, min 1.98:1 on surface */
+[data-at-theme-preset='stencil'] {
+  --at-chart-1: #799600;
+  --at-chart-2: #915364;
+  --at-chart-3: #fe8e42;
+  --at-chart-4: #00a3ab;
+  --at-chart-5: #2054d2;
+  --at-chart-6: #fa569c;
+
+  --at-chart-grid: #ded8cb;
+  --at-chart-axis-line: #b8b1a5;
+  --at-chart-track: #e8e2d5;
+}
+
+/* dark — worst pair dE 51.1, adjacent under CVD 57.7, any pair under CVD 14.7, L* spread 30, min 3.26:1 on surface */
+[data-at-theme='dark'][data-at-theme-preset='stencil'] {
+  --at-chart-1: #7e9c04;
+  --at-chart-2: #b63f6c;
+  --at-chart-3: #eea048;
+  --at-chart-4: #06a9ae;
+  --at-chart-5: #2a6aec;
+  --at-chart-6: #c3b0e2;
+
+  --at-chart-grid: #322e25;
+  --at-chart-axis-line: #585248;
+  --at-chart-track: #29241d;
+}
+
+/* ══ Gantry ══ */
+/* light — worst pair dE 28.0, adjacent under CVD 62.5, any pair under CVD 17.4, L* spread 27, min 2.51:1 on surface */
+[data-at-theme-preset='gantry'] {
+  --at-chart-1: #4c7bfe;
+  --at-chart-2: #c70462;
+  --at-chart-3: #cd9c02;
+  --at-chart-4: #076a5d;
+  --at-chart-5: #7242c0;
+  --at-chart-6: #e37b9d;
+
+  --at-chart-grid: #e7e8e8;
+  --at-chart-axis-line: #bcbdbe;
+  --at-chart-track: #f2f2f2;
+}
+
+/* dark — worst pair dE 31.4, adjacent under CVD 66.2, any pair under CVD 13.4, L* spread 30, min 3.26:1 on surface */
+[data-at-theme='dark'][data-at-theme-preset='gantry'] {
+  --at-chart-1: #438ffe;
+  --at-chart-2: #b83f5b;
+  --at-chart-3: #c8bc0c;
+  --at-chart-4: #499685;
+  --at-chart-5: #6a56d6;
+  --at-chart-6: #f6a0bd;
+
+  --at-chart-grid: #252e35;
+  --at-chart-axis-line: #485159;
+  --at-chart-track: #1d252c;
+}
+
+/* ══ Lacquer ══ */
+/* light — worst pair dE 50.3, adjacent under CVD 52.1, any pair under CVD 23.9, L* spread 30, min 2.29:1 on surface */
+[data-at-theme-preset='lacquer'] {
+  --at-chart-1: #039f75;
+  --at-chart-2: #dda100;
+  --at-chart-3: #735b31;
+  --at-chart-4: #7cb1dc;
+  --at-chart-5: #377eff;
+  --at-chart-6: #894874;
+
+  --at-chart-grid: #e9e7e8;
+  --at-chart-axis-line: #c2bdbf;
+  --at-chart-track: #f3f2f2;
+}
+
+/* dark — worst pair dE 51.3, adjacent under CVD 53.2, any pair under CVD 21.0, L* spread 30, min 3.40:1 on surface */
+[data-at-theme='dark'][data-at-theme-preset='lacquer'] {
+  --at-chart-1: #08a479;
+  --at-chart-2: #e7b012;
+  --at-chart-3: #7a693b;
+  --at-chart-4: #72b9dd;
+  --at-chart-5: #4d5cdd;
+  --at-chart-6: #975581;
+
+  --at-chart-grid: #34242a;
+  --at-chart-axis-line: #59494d;
+  --at-chart-track: #2a1b22;
+}
+
+/* ══ Nocturne ══ */
+/* light — worst pair dE 55.0, adjacent under CVD 55.3, any pair under CVD 23.5, L* spread 30, min 2.29:1 on surface */
+[data-at-theme-preset='nocturne'] {
+  --at-chart-1: #2195c4;
+  --at-chart-2: #7d5636;
+  --at-chart-3: #e39e00;
+  --at-chart-4: #0ac19b;
+  --at-chart-5: #9076fc;
+  --at-chart-6: #b80366;
+
+  --at-chart-grid: #e7e8e9;
+  --at-chart-axis-line: #bbbdc2;
+  --at-chart-track: #f2f2f3;
+}
+
+/* dark — worst pair dE 57.4, adjacent under CVD 57.6, any pair under CVD 21.9, L* spread 30, min 3.32:1 on surface */
+[data-at-theme='dark'][data-at-theme-preset='nocturne'] {
+  --at-chart-1: #009ccf;
+  --at-chart-2: #7e673c;
+  --at-chart-3: #d5b809;
+  --at-chart-4: #09d1a8;
+  --at-chart-5: #6a56d6;
+  --at-chart-6: #bd4778;
+
+  --at-chart-grid: #222b3c;
+  --at-chart-axis-line: #454e60;
+  --at-chart-track: #1a2233;
+}
+
+/* ══ Primer ══ */
+/* light — worst pair dE 35.2, adjacent under CVD 66.6, any pair under CVD 13.4, L* spread 30, min 2.30:1 on surface */
+[data-at-theme-preset='primer'] {
+  --at-chart-1: #0985ee;
+  --at-chart-2: #8a4c56;
+  --at-chart-3: #9eb602;
+  --at-chart-4: #49907b;
+  --at-chart-5: #6746c4;
+  --at-chart-6: #f38bb1;
+
+  --at-chart-grid: #e6e9ec;
+  --at-chart-axis-line: #bac1c9;
+  --at-chart-track: #f1f3f4;
+}
+
+/* dark — worst pair dE 54.7, adjacent under CVD 56.7, any pair under CVD 16.8, L* spread 24, min 3.77:1 on surface */
+[data-at-theme='dark'][data-at-theme-preset='primer'] {
+  --at-chart-1: #0195f7;
+  --at-chart-2: #e92063;
+  --at-chart-3: #ceba0a;
+  --at-chart-4: #07a47e;
+  --at-chart-5: #ab52d1;
+  --at-chart-6: #e8a6bf;
+
+  --at-chart-grid: #3d311f;
+  --at-chart-axis-line: #625440;
+  --at-chart-track: #342916;
+}
+
+/* ══ Sorbet ══ */
+/* light — worst pair dE 42.4, adjacent under CVD 58.5, any pair under CVD 22.1, L* spread 30, min 2.30:1 on surface */
+[data-at-theme-preset='sorbet'] {
+  --at-chart-1: #d14dc7;
+  --at-chart-2: #85513f;
+  --at-chart-3: #bfac00;
+  --at-chart-4: #036879;
+  --at-chart-5: #4c7bfe;
+  --at-chart-6: #c594ba;
+
+  --at-chart-grid: #eae8ea;
+  --at-chart-axis-line: #c4bec5;
+  --at-chart-track: #f3f2f4;
+}
+
+/* dark — worst pair dE 47.1, adjacent under CVD 60.0, any pair under CVD 23.1, L* spread 27, min 3.19:1 on surface */
+[data-at-theme='dark'][data-at-theme-preset='sorbet'] {
+  --at-chart-1: #df5cd5;
+  --at-chart-2: #99664e;
+  --at-chart-3: #e1b30e;
+  --at-chart-4: #08878d;
+  --at-chart-5: #2a6aec;
+  --at-chart-6: #d5abd7;
+
+  --at-chart-grid: #413344;
+  --at-chart-axis-line: #645566;
+  --at-chart-track: #392a3b;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   Chart colours used as TYPE — the tint-chip foregrounds
+   ────────────────────────────────────────────────────────────────────────
+   The palette above is tuned for FILLS on the plot surface: bars, strokes,
+   areas. Sixty-odd chips around the template reuse it for a label instead —
+   `background: color-mix(in oklab, var(--at-chart-N) 18%, transparent)` with
+   `color: var(--at-chart-N)` — an avatar monogram, a category badge. At 18%
+   the ground is all but paper, so the label was drawing itself at 2.05:1
+   (chart-1) to 2.93:1 (chart-6): the same colour, on a wash of itself.
+
+   Same clamp as the role foregrounds in _roles.css — --at-fg-l carries it, so
+   the ceiling and the light/dark direction are defined once, there. Deriving
+   these rather than authoring them is the whole point: this file already
+   carries 6 slots x 12 presets x 2 modes, and a hand-tuned foreground palette
+   would be a second set of the same size to keep in step. One block covers
+   both modes because --at-fg-l is what flips.
+   ════════════════════════════════════════════════════════════════════════ */
+:root {
+  --at-chart-1-text: oklch(from var(--at-chart-1) var(--at-fg-l) c h);
+  --at-chart-2-text: oklch(from var(--at-chart-2) var(--at-fg-l) c h);
+  --at-chart-3-text: oklch(from var(--at-chart-3) var(--at-fg-l) c h);
+  --at-chart-4-text: oklch(from var(--at-chart-4) var(--at-fg-l) c h);
+  --at-chart-5-text: oklch(from var(--at-chart-5) var(--at-fg-l) c h);
+  --at-chart-6-text: oklch(from var(--at-chart-6) var(--at-fg-l) c h);
+}
+
+/* ══ Mode-invariant chart semantics ══ */
+:root {
+  /* financial semantics — these follow the preset's own success/danger */
+  --at-chart-up: var(--at-success);
+  --at-chart-down: var(--at-danger);
+  --at-delta-up: var(--at-success);
+  --at-delta-down: var(--at-danger);
+
+  /* chart chrome consumed by plugins/charts.js */
+  --at-chart-axis: var(--at-text-muted);
+  --at-chart-tooltip-bg: var(--at-surface);
+  --at-chart-tooltip-text: var(--at-text-strong);
+}

@@ -1,0 +1,322 @@
+/* ════════════════════════════════════════════════════════════════════════
+   _roles.css — Layer 2: the role aliases components consume
+   ────────────────────────────────────────────────────────────────────────
+   Light values on :root (default = Atelier preset, concept c2, inline).
+   Dark values under [data-at-theme="dark"]. Other presets override the full
+   cohesive set in _themes.css. Components and pages ONLY use these role
+   tokens (and the chart palette) — never the primitives directly.
+
+   ── TWO CONTRACTS THIS FILE ESTABLISHES ─────────────────────────────────
+
+   1. THE INK SPLIT — --at-ink is THE PRINTED IMPRESSION, not "the dark one".
+
+   Bold Press draws the border AND the hard offset shadow AND strong type AND
+   a handful of solid fills from one colour. In light that is right: one dark
+   ink on pale stock, and a dark line on a light ground reads as an absence of
+   light — calm at any contrast. Dark mode inverts the physics. A light line on
+   a dark ground reads as an *emission*: it blooms, and the eye is pulled to
+   it. Atelier dark used to ship a #e8ddc9 edge on a #221a13 surface — 12.75:1,
+   i.e. body-text contrast, applied to the outline of every element on the page
+   and to the 4px shadow slab under each one. That was the glare.
+
+   ~70 border sites across components/shell/nav/base write var(--at-ink)
+   directly rather than going through --at-border, and every packed shadow
+   token composes var(--at-ink) too, so retuning --at-border alone would have
+   changed almost nothing. Instead --at-ink keeps its border sites and its
+   shadows and becomes the impression; the dozen sites that need full-strength
+   ink for *type* or a *solid fill* read --at-ink-strong.
+
+     --at-ink         the impression. In dark, ~2.7:1 on its own surface.
+     --at-ink-strong  type + solid fills. In dark, the old full-strength value.
+
+   In light the two are the same colour, so light mode is a provable no-op.
+   --at-border, --at-border-strong and every --at-shadow-* token alias --at-ink
+   and so follow it down automatically — border and shadow stay one impression,
+   exactly as they are in light.
+
+   2. THE ON-FILL FAMILY — one foreground token per fill role.
+
+   The system used to have exactly one, --at-on-accent, hardcoded to #ffffff.
+   Measured white-on-accent in light across the presets it ran 2.9–3.3:1, and
+   that token also paints the Primary button label, the active tab pill, active
+   pagination, the selected segment, avatar initials, the cart badge and the
+   nav active item — so the whole product read washed-out at once.
+
+   In LIGHT most fills are mid-tone and take ink, which is also the correct
+   letterpress idiom: black on a colour block. In DARK every fill is lightened,
+   so every on-* takes the canvas, with no exceptions across the twelve.
+
+   Each preset states its full on-* family explicitly rather than inheriting
+   the ones it does not change. That is deliberate: preset blocks in _themes.css
+   are (0,1,0), the same specificity as the [data-at-theme='dark'] block below,
+   and they load later — so a light-mode value left standing in a preset block
+   would win in dark mode on source order. Explicit beats clever here.
+   ════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  color-scheme: light;
+
+  /* ══ DEFAULT PRESET: Atelier (concept c2) — spec 01 §3.1 ══
+     These are inline so :root with no data-at-theme-preset resolves.
+     Other presets override the full block in _themes.css. */
+
+  /* ink — the impression: border + shadow. See contract 1 above. */
+  --at-ink: #2e2317;
+  /* type + solid fills. Same colour as the impression in light, by design. */
+  --at-ink-strong: var(--at-ink);
+
+  /* canvas + surfaces */
+  --at-canvas: #f3ebda;
+  --at-surface: #ffffff;
+  --at-surface-subtle: #efe6d2;
+  --at-surface-raised: #ffffff;
+  --at-surface-overlay: #ffffff;
+
+  /* paper — the sheet content sits on (avatar separators, chat bubbles).
+     Alias of surface so it tracks every preset + dark mode automatically. */
+  --at-paper: var(--at-surface);
+
+  /* fills (hover/active tints) */
+  --at-fill-hover: #f3ebda;
+  --at-fill-active: #e8dcc3;
+
+  /* borders (alias of ink — Bold Press borders are always ink) */
+  --at-border: var(--at-ink);
+  --at-border-strong: var(--at-ink);
+
+  /* text */
+  --at-text-strong: var(--at-ink);
+  --at-text: #3d3326;
+  --at-text-muted: #6b5a3d; /* bru-muted c2 */
+  --at-text-subtle: #8a7758;
+  --at-text-disabled: #b3a487;
+
+  /* ── the accent, split in two ──
+     --at-accent was doing two jobs that want opposite lightness: it is the
+     FILL under a label (button, tab pill, pagination, avatar) and it is also a
+     FOREGROUND (link, focus ring, .at-text-accent, the cart and notification
+     icons, the appbar brand hover). One value cannot serve both — every step
+     that helps the label hurts the link.
+
+       --at-accent       the FILL.  L*72, so ink lands at 7.10:1.
+       --at-on-accent    what sits ON the fill.
+       --at-accent-text  the FOREGROUND. L*43, same hue, chroma x0.70, so it
+                         clears 4.5:1 on canvas, on #fff AND on its own wash
+                         (the icon chips sit on the wash).
+
+     Where accent sits on INK — the sidebar stamp, .at-btn--dark's offset
+     shadow — it stays --at-accent and simply gets stronger: 4.8 -> 7.1. */
+  --at-accent: #ff946f; /* was #dc7e60 — L*72 terracotta, ink at 7.10:1 */
+  --at-accent-hover: #ff6e3e; /* L*64, ink 5.52:1 */
+  --at-accent-wash: #f8e2d7;
+  --at-accent-rgb: 255, 148, 111;
+  --at-accent-text: #b2401c; /* 4.86 canvas / 5.76 #fff / 4.63 own wash */
+
+  --at-secondary: #ce9a38; /* bru-yellow c2 — mustard */
+  --at-secondary-wash: #f3e6c8;
+  /* was #41522f forest — the cool anchor. Atelier carried three colours from
+     one warm family and nothing cool anywhere, so ACCENT / TERTIARY / DANGER /
+     INFO badges were mutually indistinguishable. Since --at-info aliases
+     --at-tertiary, "info" also stops being a third green. */
+  --at-tertiary: #2d4a5c; /* prussian */
+  --at-tertiary-wash: #d9e3e9;
+  --at-lime: #c3c96e; /* was #9aab6a — lighter, yellower */
+  --at-lime-wash: #f0f1dc;
+
+  /* semantics — base aliases to preset values */
+  --at-success: #4f7d2a; /* was #94b04c — a true green, 31 dE off lime */
+  --at-success-500: var(--at-success);
+  --at-warning: var(--at-secondary);
+  --at-warning-500: var(--at-warning);
+  --at-danger: #9e2b22; /* was #ce7a5c — crimson brick, off the accent family */
+  --at-danger-500: var(--at-danger);
+  --at-info: var(--at-tertiary);
+  --at-info-500: var(--at-info);
+
+  /* ── on-fill foregrounds (contract 2) ──
+     Ink except where the fill is dark enough to need white. --on-success is
+     the one Atelier exception: #4f7d2a is a deep green and takes white. */
+  --at-on-accent: var(--at-ink);
+  --at-on-secondary: var(--at-ink);
+  --at-on-tertiary: #ffffff;
+  --at-on-lime: var(--at-ink);
+  --at-on-success: #ffffff;
+  --at-on-warning: var(--at-ink);
+  --at-on-danger: #ffffff;
+  --at-on-info: #ffffff;
+
+  /* ── foreground variants (contract 3) ──
+     Every colour above is a FILL. A fill is chosen to be light enough that ink
+     reads on top of it, which is exactly what makes it fail as a foreground:
+     --at-secondary drew labels at 2.53:1 on paper and 2.17:1 on its own 18%
+     tint, --at-lime at 1.60:1. --at-accent already had this split solved by
+     hand (--at-accent-text, twelve tuned values); these generalise it.
+
+     The clamp, not a second hand-tuned palette: OKLCH lightness is the only
+     axis that decides contrast, so pinning it to a ceiling and leaving chroma
+     and hue untouched keeps the colour recognisably itself while making it
+     legible. min() means an already-dark fill is passed through unchanged —
+     --at-danger (L*.38) and --at-tertiary come out bit-identical, so nothing
+     that passed today shifts.
+
+     L ceiling 0.36 was measured, not picked: it is the highest ceiling where
+     all 14 colours clear 4.5:1 on paper, canvas, surface-subtle, and on a tint
+     of themselves at every strength the template actually paints a chip with
+     (12/14/15/16/18/22%) over both paper and canvas — 2520 combinations per
+     mode across the 12 presets. Worst case at 0.36 is 4.63:1 (gantry, chart-2
+     on its own 22% tint over canvas); 0.38 drops that to 4.36 and fails.
+     Calibrating on the common 18% chip alone would have passed 0.42 and left
+     the 22% chips — the chat and email avatars — a shade under.
+
+     Derived rather than authored, so a preset that retunes --at-success gets a
+     matching foreground for free and cannot drift out of step.
+
+     --at-fg-l holds the clamp itself, not a colour, so the same rule can be
+     applied to a colour this file has never seen — a chart slot, a `--c` set
+     on a calendar chip, a color computed in a component. Those are the sites a token
+     list cannot reach, and they had the identical bug. Write them as
+     `oklch(from <any colour> var(--at-fg-l) c h)` and they follow the theme,
+     including the direction flip in dark. */
+  --at-fg-l: min(l, 0.36);
+
+  --at-secondary-text: oklch(from var(--at-secondary) var(--at-fg-l) c h);
+  --at-tertiary-text: oklch(from var(--at-tertiary) var(--at-fg-l) c h);
+  --at-lime-text: oklch(from var(--at-lime) var(--at-fg-l) c h);
+  --at-success-text: oklch(from var(--at-success) var(--at-fg-l) c h);
+  --at-warning-text: oklch(from var(--at-warning) var(--at-fg-l) c h);
+  --at-danger-text: oklch(from var(--at-danger) var(--at-fg-l) c h);
+  --at-info-text: oklch(from var(--at-info) var(--at-fg-l) c h);
+
+  /* muted (re-export for semantic context) */
+  --at-muted: #6b5a3d;
+
+  /* fonts — spec 01 §4.1. These are the DEFAULT Atelier type set (Fraunces +
+     Libre Franklin), and they are a separate axis from the colours above: the
+     other eleven sets live in _typography.css under data-at-type-preset, and
+     any of them composes with any colour scheme. Selecting Atelier type in the
+     customizer removes that attribute and falls back to these two lines. The
+     mono is constant across all twelve and is not part of the axis. */
+  --at-font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  /* Libre Franklin, not Inter. Inter is a UI grotesque with a neutralised,
+     screen-first skeleton; under an optical serif it reads as two unrelated
+     decisions. Libre Franklin is Franklin Gothic lineage — the newspaper
+     grotesque an editorial serif was always set against — so the pair has one
+     origin story. Variable 100-900, so 400/500/600/700 are all drawn cuts. */
+  --at-font-sans: 'Libre Franklin', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --at-font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* focus — the trim keyline's colour; see tokens/_recipes.css.
+     The foreground half of the accent, not the impression: the ring has to
+     clear 3:1 on whatever ground it lands on, and --at-accent-text is built to
+     clear 4.5 on canvas, surface and wash. _recipes.css also spends this token
+     on the counter-print, so a dim value would cost both silhouettes at once. */
+  --at-focus-ring: var(--at-accent-text);
+
+  /* link */
+  --at-link: var(--at-accent-text);
+  --at-link-hover: #992b08;
+
+  /* selection — the accent FILL, not the foreground. A highlight is a plate
+     the type sits on, the same job --at-accent is cut for, so it takes the
+     same on-fill foreground and inherits that pair's contrast contract in
+     every preset and both themes. --at-accent-text would be wrong twice: it
+     is drawn dark to clear 4.5 on canvas, so as a ground it is muddy, and it
+     has no companion foreground guaranteed to sit on it.
+     Both are aliases, so a preset that re-cuts its accent re-cuts its
+     highlight with it and neither block below needs a dark override. */
+  --at-select-bg: var(--at-accent);
+  --at-select-fg: var(--at-on-accent);
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   DARK MODE — spec 01 §3.4. Inverts canvas↔ink in the ink hue.
+   Composes with the active preset via compound selectors in _themes.css.
+
+   This block carries BOTH halves: the shared dark rules (which every preset
+   restates in its own block — see contract 2) and Atelier's own dark values,
+   since Atelier has no preset attribute to compound with.
+   ════════════════════════════════════════════════════════════════════════ */
+[data-at-theme='dark'] {
+  color-scheme: dark;
+
+  /* Atelier dark: ink-hue canvas + the split impression.
+     --at-ink is cut from --at-accent rather than dimmed toward grey, so the
+     impression carries the theme's own hue: oklch(0.494 0.077 40.4), which is
+     1.00:1 against the neutral #675e52 it replaces — a pure hue rotation at
+     held luminance, so the printed weight is provably unchanged. */
+  --at-ink-strong: #e8ddc9; /* the old ink — type + solid fills keep it */
+  --at-ink: #87523f; /* the impression — 2.70:1 on surface, 2.87:1 on canvas. Do not brighten */
+  --at-canvas: #1a1410; /* ink hue darkened to ~L12% */
+  --at-surface: #221a13;
+  --at-surface-subtle: #2a2017;
+  --at-surface-raised: #2e241a;
+  --at-surface-overlay: #34281d;
+
+  --at-fill-hover: #2a2017;
+  --at-fill-active: #38291a;
+
+  --at-text-strong: var(--at-ink-strong);
+  --at-text: #d4c7ad;
+  --at-text-muted: #a89a7e;
+  --at-text-subtle: #847660;
+  --at-text-disabled: #5a4f3f;
+
+  /* accent lightened for dark canvas */
+  --at-accent: #e89478;
+  --at-accent-hover: #f0a88e;
+  --at-accent-wash: #3a221a;
+  --at-accent-rgb: 232, 148, 120;
+  /* Already light enough to be its own foreground, so the split collapses. */
+  --at-accent-text: var(--at-accent);
+
+  --at-secondary: #e0b358;
+  --at-secondary-wash: #2f2410;
+  --at-tertiary: #7ba3bd; /* prussian, lifted for the dark canvas */
+  --at-tertiary-wash: #16232b;
+  --at-lime: #d5d98e;
+  --at-lime-wash: #23250f;
+
+  --at-success: #8fc95c;
+  --at-warning: var(--at-secondary);
+  --at-danger: #f4574a; /* was #e09478 — 3.6 dE from the accent, one colour */
+  --at-info: var(--at-tertiary);
+
+  /* Every fill is lightened in dark, so every foreground is the canvas.
+     No exceptions across the twelve presets. */
+  --at-on-accent: var(--at-canvas);
+  --at-on-secondary: var(--at-canvas);
+  --at-on-tertiary: var(--at-canvas);
+  --at-on-lime: var(--at-canvas);
+  --at-on-success: var(--at-canvas);
+  --at-on-warning: var(--at-canvas);
+  --at-on-danger: var(--at-canvas);
+  --at-on-info: var(--at-canvas);
+
+  /* Foreground variants — the light-mode clamp inverted. Dark grounds need a
+     FLOOR, not a ceiling: max() lifts anything too dark to read and passes an
+     already-light fill through untouched, which is why most of these come out
+     equal to the fill itself here (the same collapse --at-accent-text makes
+     one line below). 0.78 is the measured floor: it is the lowest floor where
+     all 13 clear 4.5:1 on surface, canvas, surface-subtle and their own 18%
+     tint at every strength the template uses, across the twelve dark presets —
+     worst case 4.94:1 (sorbet, danger on its own 22% tint over surface).
+     0.80 drops that to 4.73 and 0.78 to 4.54, both thinner than is worth
+     shipping when the cost of the floor is a shade of chroma.
+
+     Only --at-fg-l flips; the seven derived tokens below are written once, in
+     the light block, and pick the new direction up through it. */
+  --at-fg-l: max(l, 0.82);
+
+  --at-muted: #a89a7e;
+
+  /* The focus keyline must NOT follow the impression down — --at-ink is now
+     ~2.7:1 on its own surface, under the 3:1 floor a focus indicator has to
+     clear. Accent is the right value and not a special-cased grey: in dark it
+     is the lightest chromatic thing in the palette and carries the canvas at
+     4.5:1+, so it clears 3:1 on both grounds with room (here 7.76 / 7.30). It
+     is also what --at-accent-text resolves to above, so link, focus mark and
+     accent type are one colour in dark — the light-mode relationship too. */
+  --at-focus-ring: var(--at-accent);
+  --at-link: var(--at-accent);
+  --at-link-hover: var(--at-accent-hover);
+}

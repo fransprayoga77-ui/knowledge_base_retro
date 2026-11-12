@@ -1,0 +1,358 @@
+/* ════════════════════════════════════════════════════════════════════════
+   _recipes.css — Layer 3: Bold Press identity primitives — spec 01 §7.3, §12
+   ────────────────────────────────────────────────────────────────────────
+   The shared Bold Press primitives referenced by base/components/nav/shell.
+   These define the look: ink borders, hard offset shadows, the press
+   interaction, the active-nav stamp marker, focus rings. No glass/blur.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── Global focus-visible — spec 01 §12 ──
+   :focus-visible only (mouse clicks must not show rings).
+
+   THE COUNTER-PRINT. Focus is not a ring on a pressable control, because a
+   ring is symmetric and the thing it would be ringing is not. The impression
+   is block + offset block, and the offset block only exists down-right: on
+   the left and top a ring leaves the clean gap it was designed to leave, and
+   on the right and bottom the 3px slab fills that gap and the two fuse into
+   one heavy lopsided band. Their corner radii don't line up either, because
+   the slab's corners sit 3px down-right of the ring's. No amount of
+   re-colouring fixes a geometry fault — the mark has to stop being a ring.
+
+   So the pressable controls strike a second time instead: --at-focus-print
+   (-3px -3px) inked in --at-focus-ring, thrown the opposite way from the
+   offset block. The two impressions bracket the control. There is nothing for
+   the mark to collide with, in any variant, at any shadow depth, in either
+   theme — and it is the most native thing this language can say, a press
+   shop's double strike.
+
+   Everything else keeps the trim keyline: one hard rule printed outside the
+   element with a clean gap between. Not a fallback so much as the other half
+   of the pair — a print needs a block to be printed on, and an inline <a>, a
+   bare tabbable region or a third-party widget has none. Two silhouettes, one
+   system: what sits on an impression brackets, a run of text rules.
+
+   Three things this deliberately does NOT do, each of which the accent ring
+   before the keyline did:
+
+   1. It does not assign box-shadow. That ring was a two-stop spread shadow
+      (canvas gap, then accent) assigned straight to box-shadow, which
+      REPLACED the offset block — every button, card and input went flat the
+      instant it was tabbed to, losing the one layer that makes it Bold Press.
+      box-shadow is a single property and cannot be appended to by the
+      cascade, so the print rides in a layer the controls already carry
+      (--at-shadow-focus, components.css §1) and this rule only swaps that
+      layer's value. The offset block is never addressed at all.
+   2. It does not set border-radius. The old rule forced --at-radius-xs onto
+      whatever was focused, so pills, avatars and toggles snapped square. Both
+      the outline and the print follow the element's own radius.
+   3. It is inked, not accented. A focus mark has to clear 3:1 against
+      whatever it lands on across six presets × two themes, and accent on
+      canvas does not — terracotta on cream is 1.9:1. That is exactly why the
+      old rule had to overprint an ink outline on top of its accent ring to
+      stay legible, which is also why it read as one thick muddy band. Ink is
+      the one value legible on every ground by construction.
+
+   --at-focus-ring stays the knob and it colours both silhouettes: a preset
+   that wants a coloured mark points it at a value that clears 3:1 on its own
+   canvas (the revised theme work in temp/ does exactly this with
+   --at-accent-text, which is what the buttons.html study was reviewed in). */
+
+/* Non-inheriting, so a focused control cannot hand its print down to a
+   shadow-bearing descendant. The initial-value is what every unfocused
+   element resolves to and must stay in sync with the :root declaration in
+   _primitives.css, which is the fallback where @property is unsupported. */
+@property --at-shadow-focus {
+  syntax: '*';
+  inherits: false;
+  initial-value: 0 0 0 0 transparent;
+}
+
+*:focus {
+  outline: none;
+}
+*:focus-visible {
+  outline: var(--at-focus-ring-width) solid var(--at-focus-ring);
+  outline-offset: var(--at-focus-ring-offset);
+}
+
+/* Everything that rests on an offset block prints rather than rings. The list
+   is not "the buttons" — it is every control built the Bold Press way, an ink
+   border on a hard offset block, because that construction is what a symmetric
+   ring collides with. Membership is decidable by looking at one thing: does the
+   control carry a resting --at-shadow-N? If it does and it can take focus, it
+   belongs here, and it must also carry --at-shadow-focus in its own box-shadow
+   list for the swap below to have anywhere to land.
+
+   Fields (.at-input/.at-select/.at-textarea), the search shell, the hamburger
+   and the pagination numerals were all falling through to *:focus-visible, and
+   the collision was plainly visible on every one: a clean gap up-left, and
+   down-right the ring and the slab fusing into a single heavy band with two
+   sets of corner radii a few px out of register.
+
+   Unlayered, so it clears both *:focus-visible above and every rule in
+   @layer components without !important.
+
+   --ghost is excluded on the system's own logic: it has no border and no
+   resting shadow, so there is no impression to strike a second time — and
+   equally, no offset block for a ring to collide with. The symmetric keyline
+   is exactly right on the one variant that is symmetric.
+
+   .at-search is here as the shell, not the input inside it — only the shell
+   owns a border and an offset block, so the shell is the only part that can be
+   printed on. This covers the header's ⌘K trigger, which is focusable itself
+   (role="button" tabindex="0") and keeps its shadow; the flattened filter
+   fields are handled separately below. */
+:is(
+  .at-btn,
+  .at-icon-btn,
+  .at-input,
+  .at-select,
+  .at-textarea,
+  .at-search,
+  .at-menu-toggle,
+  .at-pagination__btn
+):not(.at-btn--ghost):focus-visible {
+  --at-shadow-focus: var(--at-focus-print) var(--at-focus-ring);
+  outline: none;
+}
+
+/* The other .at-search is the filter field on the table/listing pages, which
+   wraps a live input[type="search"] and is flattened per instance in the markup
+   with an inline box-shadow: none (16 of them; two hold a live input, the rest
+   are display-only and never take focus).
+
+   Those get the keyline, and they get it for the reason --ghost does: flattened
+   means no impression, and with no offset block to collide with, the symmetric
+   ring is exactly right. A print would be wrong twice over — nothing to strike
+   a second time, and the inline style outranks any stylesheet, so the layer it
+   rides in is dead on these anyway.
+
+   It rings the shell rather than the inner input because the input is inset by
+   the shell's padding and fills its height, so a ring on the input bleeds
+   through the shell's top and bottom border instead of enclosing the field.
+
+   The invariant this rests on: a shell holding a live input is flattened. Put a
+   live input in one that still has its shadow and this keyline lands back on an
+   offset block — the collision at the top of this file. Give that shell the
+   print instead if it ever happens. */
+.at-search:has(:focus-visible) {
+  outline: var(--at-focus-ring-width) solid var(--at-focus-ring);
+  outline-offset: var(--at-focus-ring-offset);
+}
+.at-search :is(input, [tabindex]):focus-visible {
+  outline: none;
+}
+
+/* An input-group is one control made of three boxes, so the mark goes on the
+   group. Printed on the member instead, the strike lands *inside* the control:
+   its left arm crosses the prefix addon and its top arm runs only the width of
+   the field, which reads as a stray mark sitting on the group rather than a
+   mark made by it. The group's border-box is exactly the union of addon +
+   field + addon, so a print behind it brackets the whole control.
+
+   This is the same fault .at-btn-group has and the opposite fix, because the
+   two groups are built the other way round: that one owns the border and the
+   shadow and clips its members, so the mark had to move inward. Here every
+   part owns its own edge and nothing clips, so the mark moves outward. */
+.at-input-group:has(:focus-visible) {
+  --at-shadow-focus: var(--at-focus-print) var(--at-focus-ring);
+}
+/* …and the member gives its print up, or the group is struck twice. Written
+   out rather than as `initial` because the guaranteed-invalid value would take
+   the whole box-shadow list down with it where @property is unsupported; this
+   is the same value _primitives.css declares as that fallback. */
+.at-input-group > :is(.at-input, .at-select, .at-textarea):focus-visible {
+  --at-shadow-focus: 0 0 0 0 transparent;
+}
+
+/* The one place the print cannot go. A group owns the border and the shadow
+   and clips its members with overflow: hidden (components.css §2), so a strike
+   thrown up-left is cut off before it is seen — and so is an outward keyline,
+   which is why these were shipping a focus mark half-eaten by the shell. The
+   keyline moves inside the member, the only mark that survives the clip.
+
+   It is set back by its own width rather than sitting flush at the member's
+   edge, because flush is the same fault one step in: outline-offset puts the
+   outline's inner edge on the offset path and grows the stroke outward, so
+   -2px would land the keyline directly against the shell's 2px border and the
+   two would print as one 4px band — a member that looks thicker, not focused.
+   -4px leaves a 2px gap of bare block between them, which is the gap that
+   makes two rules read as two rules.
+
+   Segment and accordion heads are clipped the same way and still take the
+   outward keyline from the global rule. Pre-existing, untouched here — they
+   are not .at-btn, so nothing in this file changed for them. */
+.at-btn-group .at-btn:focus-visible {
+  outline: var(--at-focus-ring-width) solid var(--at-focus-ring);
+  outline-offset: calc(-2 * var(--at-focus-ring-width));
+}
+
+/* Forced-colors modes paint no shadows at all, so the print does not exist
+   there and a focused button would be left with nothing. Both silhouettes
+   collapse back to the system highlight keyline. */
+@media (forced-colors: active) {
+  :is(
+    .at-btn,
+    .at-icon-btn,
+    .at-input,
+    .at-select,
+    .at-textarea,
+    .at-search,
+    .at-menu-toggle,
+    .at-pagination__btn
+  ):not(.at-btn--ghost):focus-visible,
+  .at-input-group:has(:focus-visible),
+  .at-search:has(:focus-visible) {
+    outline: var(--at-focus-ring-width) solid Highlight;
+    outline-offset: var(--at-focus-ring-offset);
+  }
+}
+
+/* ── .at-card — the Bold Press card — spec 01 §7, 05 §3 ──
+   White surface, 2px ink border, default hard shadow. No glass/blur. */
+.at-card {
+  position: relative;
+  background: var(--at-surface);
+  border: var(--at-border-w) solid var(--at-border);
+  border-radius: var(--at-radius-md);
+  box-shadow: var(--at-shadow-card);
+}
+.at-card--flat {
+  box-shadow: var(--at-shadow-none);
+}
+.at-card--feature {
+  border-width: var(--at-border-w-lg);
+  box-shadow: var(--at-shadow-6);
+}
+.at-card--subtle {
+  background: var(--at-surface-subtle);
+}
+
+/* ── .at-press — the signature press interaction — spec 01 §7.3 ──
+   On :active the element translates by the negative shadow offset and
+   flattens the shadow. Hover lifts slightly. This is mechanical, not floaty.
+
+   :not(.at-btn) — buttons own their press intrinsically (components.css §1),
+   the same way .at-icon-btn already does, so no button can ship without one.
+   The exclusion is a cascade requirement, not a preference: this file is
+   unlayered and components.css lives in @layer components, so an unscoped
+   .at-press here outranks every .at-btn rule no matter their specificity, and
+   would re-impose this generic geometry on the variants that must not take it
+   (.at-btn--ghost has no border or resting shadow to lift; group/segment
+   buttons are clipped by an overflow:hidden shell). Excluding .at-btn leaves
+   the component free to tune its own. A leftover `at-press` in button markup
+   is then a harmless no-op. */
+.at-press:not(.at-btn) {
+  transition: transform var(--at-motion-instant) var(--at-ease-emphasized),
+    box-shadow var(--at-motion-instant) var(--at-ease-emphasized);
+  will-change: transform;
+}
+.at-press:not(.at-btn):hover {
+  transform: translate(-1px, -1px);
+  box-shadow: var(--at-shadow-4);
+}
+.at-press:not(.at-btn):active {
+  transform: translate(2px, 2px);
+  box-shadow: var(--at-shadow-press);
+}
+
+/* Larger press surfaces (cards) depress further.
+
+   Bound to .at-card.at-press as well as the explicit .at-press-lg, because the
+   card rests on --at-shadow-card (4px) and not the 3px the generic .at-press
+   assumes: the shared 2px travel stopped two pixels short of its own shadow,
+   the same mis-registration .at-btn had to fix for itself in components.css §1.
+   .at-press-lg carried the right numbers all along but shipped unused on all
+   115 pages, so every pressable card in the template was landing short.
+   Binding the geometry to the card is what keeps that from recurring — the
+   markup can no longer forget the second class. .at-press-lg stays valid on
+   its own for anything else that rests on a 4px block.
+
+   The transition still comes from .at-press:not(.at-btn) above; a card is
+   never a button, so it always matches. */
+.at-press-lg:hover,
+.at-card.at-press:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--at-shadow-6);
+}
+.at-press-lg:active,
+.at-card.at-press:active {
+  transform: translate(4px, 4px);
+  box-shadow: var(--at-shadow-press);
+}
+
+/* ── KPI tiles answer the cursor — spec 01 §7.3 ──
+   A KPI is a readout, not a control, so it takes the hover half of the card
+   press and none of the :active half: the lift says the tile is live, and the
+   missing press says there is nothing here to click. The geometry is the card
+   lift above to the pixel, so the template still speaks one card-lift
+   vocabulary rather than growing a second dialect for tiles.
+
+   Deliberately scoped to .at-kpi and not .at-card. A dashboard is mostly large
+   chart and table panels, and a 900px panel that jumps as the cursor crosses
+   it on the way somewhere else reads as twitch, not as polish. The KPI tiles
+   are small, discrete and sit in a row along the top of every dashboard —
+   they are what the cursor actually lands on, and they read as objects.
+
+   --at-motion-fast/standard rather than the press's instant/emphasized: the
+   press is mechanical and wants the overshoot, an ambient hover does not.
+
+   (hover: hover) — a touch device latches :hover on tap and would strand the
+   tile 2px high until something else was tapped. */
+@media (hover: hover) {
+  .at-kpi {
+    transition:
+      transform var(--at-motion-fast) var(--at-ease-standard),
+      box-shadow var(--at-motion-fast) var(--at-ease-standard);
+  }
+  .at-kpi:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--at-shadow-6);
+  }
+}
+
+/* ── .at-stamp — the active-nav marker — spec 01 §12 ──
+   A solid accent block on the inline-start edge of the active nav item,
+   replacing soft glow bars. Ink border. Mechanical emphasis. */
+.at-stamp {
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block: var(--at-space-2);
+  width: 4px;
+  background: var(--at-accent);
+  border-inline-end: var(--at-border-w-sm) solid var(--at-ink);
+}
+
+/* ── .at-eyebrow — section labels, uppercase tracked — spec 01 §4 ── */
+.at-eyebrow {
+  font-family: var(--at-font-sans);
+  font-size: var(--at-text-2xs);
+  line-height: var(--at-leading-2xs);
+  font-weight: var(--at-weight-2xs);
+  letter-spacing: var(--at-tracking-2xs);
+  text-transform: uppercase;
+  color: var(--at-text-muted);
+}
+
+/* ── Reduced motion — spec 01 §11.2 ──
+   Disables transforms/transitions. Shadows still swap (state changes), but
+   without animation. Mandatory. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .at-press:not(.at-btn):hover,
+  .at-press:not(.at-btn):active,
+  .at-press-lg:hover,
+  .at-press-lg:active,
+  .at-card.at-press:hover,
+  .at-card.at-press:active,
+  .at-kpi:hover {
+    transform: none;
+  }
+}

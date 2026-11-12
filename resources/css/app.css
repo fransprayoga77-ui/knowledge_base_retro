@@ -1,0 +1,149 @@
+/* Atelier (Bold Press) design system — token chain + komponen */
+@import './atelier/app.css';
+
+@source '../js/**/*.tsx';
+@source '../views/**/*.blade.php';
+
+/* ───────────── Knowledge base: tipografi artikel ───────────── */
+.kb-prose {
+  color: var(--at-text);
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  max-width: 72ch;
+}
+.kb-prose > * + * { margin-top: 1rem; }
+.kb-prose h2 {
+  font-family: var(--at-font-display);
+  font-weight: 700;
+  font-size: 1.5rem;
+  line-height: 1.25;
+  color: var(--at-text-strong);
+  margin-top: 2.25rem;
+  padding-bottom: .375rem;
+  border-bottom: var(--at-border-w) solid var(--at-border);
+  scroll-margin-top: 6rem;
+}
+.kb-prose h3 {
+  font-family: var(--at-font-display);
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--at-text-strong);
+  margin-top: 1.75rem;
+  scroll-margin-top: 6rem;
+}
+.kb-prose strong { color: var(--at-text-strong); font-weight: 700; }
+.kb-prose a {
+  color: var(--at-text-strong);
+  text-decoration: underline;
+  text-decoration-color: var(--at-accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+.kb-prose a:hover { background: var(--at-accent-wash); }
+.kb-prose ol, .kb-prose ul { padding-left: 1.5rem; }
+.kb-prose ol { list-style: decimal; }
+.kb-prose ul { list-style: square; }
+.kb-prose li + li { margin-top: .4rem; }
+.kb-prose li::marker { color: var(--at-accent); font-weight: 700; }
+.kb-prose code {
+  font-family: var(--at-font-mono);
+  font-size: .875em;
+  padding: .1em .35em;
+  background: var(--at-surface-subtle);
+  border: 1px solid var(--at-border);
+  border-radius: var(--at-radius-xs);
+}
+.kb-prose pre {
+  font-family: var(--at-font-mono);
+  font-size: .875rem;
+  padding: 1rem;
+  overflow-x: auto;
+  background: var(--at-surface-subtle);
+  border: var(--at-border-w) solid var(--at-border);
+  border-radius: var(--at-radius-sm);
+}
+.kb-prose pre code { border: 0; padding: 0; background: none; }
+.kb-prose blockquote {
+  padding: .875rem 1.125rem;
+  background: var(--at-accent-wash);
+  border: var(--at-border-w) solid var(--at-border);
+  border-left-width: 6px;
+  border-left-color: var(--at-accent);
+  border-radius: var(--at-radius-sm);
+}
+.kb-prose blockquote > * + * { margin-top: .5rem; }
+.kb-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .95rem;
+  display: block;
+  overflow-x: auto;
+}
+.kb-prose th, .kb-prose td {
+  text-align: left;
+  vertical-align: top;
+  padding: .55rem .75rem;
+  border: 1px solid var(--at-border);
+}
+.kb-prose th {
+  background: var(--at-surface-subtle);
+  color: var(--at-text-strong);
+  font-weight: 700;
+}
+.kb-prose--compact { font-size: .95rem; line-height: 1.6; }
+.kb-prose--compact > * + * { margin-top: .6rem; }
+.kb-prose--compact h2, .kb-prose--compact h3 { font-size: 1.05rem; margin-top: 1rem; border: 0; padding: 0; }
+
+/* Latar grid ala Atelier untuk hero */
+.kb-grid-bg {
+  background-color: var(--at-canvas);
+  background-image:
+    linear-gradient(to right, color-mix(in oklab, var(--at-ink) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--at-ink) 7%, transparent) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* Panel chat */
+.kb-chat-panel {
+  position: fixed;
+  right: 1rem;
+  bottom: 5.5rem;
+  z-index: 60;
+  width: min(420px, calc(100vw - 2rem));
+  height: min(620px, calc(100dvh - 7.5rem));
+  display: flex;
+  flex-direction: column;
+}
+.kb-chat-fab {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 60;
+}
+@media (max-width: 575px) {
+  .kb-chat-panel { right: .5rem; left: .5rem; width: auto; bottom: 5rem; height: calc(100dvh - 6rem); }
+}
+.kb-cite {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 .25rem;
+  margin-inline: .1rem;
+  font-family: var(--at-font-mono);
+  font-size: .7rem;
+  font-weight: 700;
+  line-height: 1;
+  vertical-align: super;
+  color: var(--at-on-accent) !important;
+  background: var(--at-accent);
+  border: 1.5px solid var(--at-ink);
+  border-radius: var(--at-radius-xs);
+  text-decoration: none !important;
+}
+
+/* Admin: tautan aktif di sidebar */
+.kb-nav-active { background: var(--at-accent-wash); box-shadow: inset 4px 0 0 var(--at-accent); }
+
+/* Link di area konten mengikuti warna teks induk (kecuali tombol/badge yang punya warna sendiri). */
+:where(#konten, .at-main) a { color: inherit; }
