@@ -3,7 +3,7 @@
 Pusat bantuan (knowledge base) **multi-project** pengganti buku manual, dengan **asisten AI** yang menjawab pertanyaan pengguna hanya dari artikel yang ada. Tampilan memakai design system **Atelier (Bold Press)**.
 
 - **Stack:** Laravel 13 · Inertia + React 19 + TypeScript · Tailwind CSS v4 · PostgreSQL (MySQL juga bisa)
-- **AI:** Claude (Anthropic PHP SDK) dengan pencarian artikel (RAG sederhana berbasis full-text search)
+- **AI:** bisa pilih provider: Claude, Gemini, ChatGPT, DeepSeek, GLM, OpenRouter, Groq, atau server OpenAI-compatible lain (Qwen, Kimi, Ollama lokal, dll). Model menjawab dari artikel hasil pencarian (RAG sederhana berbasis full-text search).
 
 ## Fitur
 
@@ -53,22 +53,37 @@ Seeder membuat dua project contoh:
 
 ## Mengaktifkan asisten AI
 
-Isi di `.env`:
+Masuk sebagai admin, buka **Pengaturan AI**, pilih provider, isi nama model dan API key, lalu klik **Tes koneksi** dan **Simpan**. API key disimpan terenkripsi di database (dengan `APP_KEY`).
+
+| Provider | Jalur | Catatan |
+|---|---|---|
+| Claude (Anthropic) | SDK resmi Anthropic | Haiku paling hemat; ada pengaturan effort |
+| Google Gemini | OpenAI-compatible | Ada kuota gratis di AI Studio |
+| ChatGPT (OpenAI) | OpenAI-compatible | Model mini/nano lebih murah |
+| DeepSeek | OpenAI-compatible | Sangat terjangkau |
+| GLM (Z.ai / Zhipu) | OpenAI-compatible | Base URL berbeda untuk akun bigmodel.cn |
+| OpenRouter | OpenAI-compatible | Satu key untuk ratusan model |
+| Groq | OpenAI-compatible | Cepat, ada kuota gratis |
+| Lainnya | OpenAI-compatible | Qwen/DashScope, Kimi, Mistral, Ollama lokal, dll |
+
+Nama model bawaan hanya titik awal. Nama model sering berganti, jadi cek dokumentasi provider dan pakai **Tes koneksi** untuk memastikan.
+
+Bisa juga diatur lewat `.env` (dipakai bila Pengaturan AI belum diisi):
 
 ```dotenv
-ANTHROPIC_API_KEY=sk-ant-...
-KB_AI_MODEL=claude-opus-5-5   # model yang dipakai
-KB_AI_EFFORT=low              # low | medium | high — makin tinggi makin teliti tapi lebih lambat & mahal
-KB_AI_CONTEXT_ARTICLES=5      # jumlah artikel yang dikirim sebagai konteks
+KB_AI_PROVIDER=deepseek        # anthropic | gemini | openai | deepseek | glm | openrouter | groq | custom
+KB_AI_MODEL=deepseek-chat
+KB_AI_API_KEY=sk-...
+KB_AI_BASE_URL=                # kosong = pakai bawaan provider
 ```
 
 Tanpa API key, asisten tetap berjalan dan menampilkan artikel yang paling relevan.
 
-Cara kerjanya (`app/Services/ChatAssistant.php`):
+Cara kerjanya (`app/Services/ChatAssistant.php` dan `app/Services/Ai/`):
 1. Pertanyaan dicari dengan full-text search, **hanya pada peran yang boleh dibaca pengguna**.
-2. Hingga 5 artikel teratas dikirim ke Claude bersama aturan: jawab hanya dari artikel, beri nomor sumber, jangan mengarang kebijakan/harga/kontak.
+2. Hingga 5 artikel teratas dikirim ke model bersama aturan: jawab hanya dari artikel, beri nomor sumber, jangan mengarang kebijakan/harga/kontak.
 3. Jawaban yang tidak ditemukan ditandai "tak terjawab" di log admin. Pertanyaan-pertanyaan ini bisa jadi bahan artikel baru.
-4. Server-side fallback diaktifkan: bila model menolak karena kebijakan keamanan, server otomatis mencoba model cadangan.
+4. Bila provider error (key salah, model tidak ada, kuota habis), pengguna tetap mendapat daftar artikel terkait dan pesan error-nya tercatat di **Log Chat AI**.
 
 ## Format konten (Markdown + frontmatter)
 
@@ -111,7 +126,8 @@ Artikel dengan slug yang sama akan diperbarui, bukan diduplikasi.
 ```
 app/Services/ArticleImporter.php   impor Markdown + frontmatter
 app/Services/ArticleSearch.php     pencarian full-text (pgsql) / LIKE (lainnya)
-app/Services/ChatAssistant.php     asisten AI (Claude)
+app/Services/ChatAssistant.php     asisten AI (RAG)
+app/Services/Ai/                   pilihan provider, konfigurasi, dan client LLM
 app/Services/Markdown.php          render Markdown aman + daftar isi
 app/Http/Controllers/HelpCenterController.php   pusat bantuan publik + endpoint chat
 app/Http/Controllers/Admin/*       panel admin

@@ -2,16 +2,17 @@
 
 namespace App\Services;
 
-use Anthropic\Client;
 use App\Models\Article;
 use App\Models\Project;
+use App\Services\Ai\AiConfig;
+use App\Services\Ai\LlmClient;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
 /**
  * Chatbot berbasis artikel (RAG sederhana): cari artikel relevan dengan full-text search,
- * lalu minta Claude menjawab HANYA dari artikel tersebut, lengkap dengan nomor sumber.
+ * lalu minta model AI (Claude, Gemini, ChatGPT, DeepSeek, GLM, dll) menjawab HANYA dari artikel tersebut, lengkap dengan nomor sumber.
  */
 class ChatAssistant
 {
@@ -34,7 +35,12 @@ TXT;
 
     public static function enabled(): bool
     {
-        return filled(config('kb.ai.api_key'));
+        return AiConfig::current()->enabled();
+    }
+
+    public static function systemPrompt(): string
+    {
+        return self::SYSTEM_PROMPT;
     }
 
     /**
@@ -77,7 +83,7 @@ TXT;
         }
 
         try {
-            $text = $this->callClaude($project, $question, $articles, $history);
+            $text = $this->callModel($project, $question, $articles, $history);
         } catch (Throwable $e) {
             Log::warning('KB chat gagal', ['error' => $e->getMessage()]);
 
@@ -108,7 +114,7 @@ TXT;
      * @param  Collection<int, Article>  $articles
      * @param  array<int, array{role: string, content: string}>  $history
      */
-    private function callClaude(Project $project, string $question, Collection $articles, array $history): string
+    private function callModel(Project $project, string $question, Collection $articles, array $history): string
     {
         $context = $articles->values()->map(function (Article $a, $i) use ($project) {
             $flag = $a->verification === 'needs_review' ? ' status="perlu-konfirmasi"' : '';
@@ -139,31 +145,13 @@ TXT;
             'content' => "{$intro}\n\n{$context}\n\nPertanyaan pengguna:\n{$question}",
         ];
 
-        $client = new Client(apiKey: config('kb.ai.api_key'));
+        $result = (new LlmClient(AiConfig::current()))->chat(self::SYSTEM_PROMPT, $messages);
 
-        $response = $client->beta->messages->create(
-            model: config('kb.ai.model'),
-            maxTokens: config('kb.ai.max_tokens'),
-            system: [
-                ['type' => 'text', 'text' => self::SYSTEM_PROMPT, 'cacheControl' => ['type' => 'ephemeral']],
-            ],
-            messages: $messages,
-            outputConfig: ['effort' => config('kb.ai.effort')],
-            // Bila model menolak karena kebijakan keamanan, server otomatis mencoba model cadangan.
-            fallbacks: 'default',
-            betas: ['server-side-fallback-2026-07-01'],
-        );
-
-        if ($response->stopReason === 'refusal') {
+        if ($result['refused']) {
             return self::NOT_FOUND.' Maaf, saya tidak bisa membantu pertanyaan ini. Silakan hubungi tim bantuan.';
         }
 
-        $text = '';
-        foreach ($response->content as $block) {
-            if ($block->type === 'text') {
-                $text .= $block->text;
-            }
-        }
+        $text = trim($result['text']);
 
         return $text !== '' ? $text : self::NOT_FOUND;
     }

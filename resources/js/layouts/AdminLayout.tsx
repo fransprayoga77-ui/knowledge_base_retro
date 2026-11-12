@@ -48,6 +48,7 @@ export default function AdminLayout({ title, subtitle, actions, breadcrumb, chil
                         <NavLink href="/admin/projects" icon="layers" label="Project" active={url === '/admin/projects' || is('/admin/projects/create') || /\/admin\/projects\/[^/]+\/edit/.test(url)} />
                         <NavLink href="/admin/chats" icon="chat" label="Log Chat AI" active={is('/admin/chats')} />
                         <NavLink href="/admin/users" icon="users" label="Pengguna" active={is('/admin/users')} />
+                        <NavLink href="/admin/settings/ai" icon="sparkle" label="Pengaturan AI" active={is('/admin/settings')} />
 
                         {adminProjects && adminProjects.length > 0 && (
                             <>
@@ -83,9 +84,9 @@ export default function AdminLayout({ title, subtitle, actions, breadcrumb, chil
                         </button>
                         <div className="at-header__right">
                             {!aiEnabled && (
-                                <span className="at-badge at-badge--warning hidden sm:inline-flex" title="Isi ANTHROPIC_API_KEY di .env">
+                                <Link href="/admin/settings/ai" className="at-badge at-badge--warning hidden sm:inline-flex" title="Atur provider & API key">
                                     AI belum aktif
-                                </span>
+                                </Link>
                             )}
                             <Link href="/" className="at-btn at-btn--outline at-btn--sm at-press">
                                 <Icon name="external" size={14} /> <span className="hidden sm:inline">Lihat situs</span>

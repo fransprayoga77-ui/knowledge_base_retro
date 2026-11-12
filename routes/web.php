@@ -25,6 +25,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::put('projects/{project}/categories/{category}', [Admin\CategoryController::class, 'update'])->name('categories.update')->scopeBindings();
     Route::delete('projects/{project}/categories/{category}', [Admin\CategoryController::class, 'destroy'])->name('categories.destroy')->scopeBindings();
     Route::get('chats', [Admin\ChatLogController::class, 'index'])->name('chats.index');
+    Route::get('settings/ai', [Admin\AiSettingsController::class, 'edit'])->name('settings.ai');
+    Route::put('settings/ai', [Admin\AiSettingsController::class, 'update'])->name('settings.ai.update');
+    Route::post('settings/ai/test', [Admin\AiSettingsController::class, 'test'])->name('settings.ai.test')->middleware('throttle:10,1');
     Route::resource('users', Admin\UserController::class)->except('show');
 });
 
